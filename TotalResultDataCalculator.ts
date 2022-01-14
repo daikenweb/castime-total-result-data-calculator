@@ -1,4 +1,4 @@
-import { format, subWeeks } from "date-fns/fp";
+import datefns from "date-fns/fp";
 import { calculateTotalResultData } from "./calculateTotalResultData";
 
 export type Api = (data: {
@@ -23,8 +23,8 @@ export class TotalResultDataCalculator {
     end: Date;
     userId: number;
   }) {
-    const fullDateFormat = format("yyyy-MM-dd");
-    const beginOfFetch = subWeeks(1)(begin);
+    const fullDateFormat = datefns.format("yyyy-MM-dd");
+    const beginOfFetch = datefns.subWeeks(1)(begin);
     const res = await this.#api({
       begin: fullDateFormat(beginOfFetch),
       end: fullDateFormat(end),
