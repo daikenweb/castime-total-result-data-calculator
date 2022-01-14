@@ -77,7 +77,7 @@ export const Deep_Night_AGG = function (tg_date, n_w_b_obj) {
   res_array["nomal"]["start"] = n_w_b_obj["start"];
   res_array["nomal"]["end"] = n_w_b_obj["end"];
 
-  const deep_night_end = tg_date + " 05:00:00";
+  let deep_night_end = tg_date + " 05:00:00";
   if (
     moment(n_w_b_obj["start"]) <= moment(deep_night_end) &&
     moment(n_w_b_obj["end"]) <= moment(deep_night_end)
