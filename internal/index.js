@@ -1,6 +1,8 @@
+import moment from "moment";
+
 export const OUT_WORK_AGG = function (n_w_b_obj, out_work_data) {
   //console.log("シフト外残業時間集計処理関数動作",tg_date,n_w_b_obj,out_work_data);
-  var res_array = {
+  const res_array = {
     start: "",
     end: "",
     total_time: 0,
@@ -57,9 +59,9 @@ export const OUT_WORK_AGG = function (n_w_b_obj, out_work_data) {
 
 export const Deep_Night_AGG = function (tg_date, n_w_b_obj) {
   //console.log("深夜判定データ",tg_date,n_w_b_obj);
-  //var alone_deep_night_nomal_work_time = 0;
+  //let alone_deep_night_nomal_work_time = 0;
 
-  var res_array = {
+  const res_array = {
     nomal: {
       start: "",
       end: "",
@@ -75,7 +77,7 @@ export const Deep_Night_AGG = function (tg_date, n_w_b_obj) {
   res_array["nomal"]["start"] = n_w_b_obj["start"];
   res_array["nomal"]["end"] = n_w_b_obj["end"];
 
-  var deep_night_end = tg_date + " 05:00:00";
+  const deep_night_end = tg_date + " 05:00:00";
   if (
     moment(n_w_b_obj["start"]) <= moment(deep_night_end) &&
     moment(n_w_b_obj["end"]) <= moment(deep_night_end)
@@ -107,7 +109,7 @@ export const Deep_Night_AGG = function (tg_date, n_w_b_obj) {
     //console.log("深夜から仕事が始まるパターン2");
   }
 
-  var deep_night_start = tg_date + " 22:00:00";
+  const deep_night_start = tg_date + " 22:00:00";
   deep_night_end =
     moment(tg_date).add(1, "day").format("YYYY-MM-DD") + " 05:00:00";
   if (
@@ -181,7 +183,7 @@ export const Deep_Night_AGG = function (tg_date, n_w_b_obj) {
 //カスタム集計処理関数
 export const CUSTOM_AGG = function (tg_date, n_w_b_obj, custam_data) {
   //console.log("カスタム集計処理関数動作",tg_date,n_w_b_obj,custam_data);
-  var res_array = {
+  const res_array = {
     start: "",
     end: "",
     total_time: 0,
