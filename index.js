@@ -24,7 +24,7 @@ import moment from "moment"
 export const calculateTotalResultData = ({output_type, start_date, end_date}) =>
   (res) => {
     console.log("取得確認",res);
-    const body_start = moment(start_date).format("YYYY-MM-DD");
+    const body_start = moment(start_date);
 
     //console.log("集計開始月",start_date);
     //console.log("開始設定",res["user_data"]["work_begin"]["month_decision"]);
