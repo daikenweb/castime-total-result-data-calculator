@@ -1,4 +1,4 @@
-import datefns from "date-fns/fp";
+import * as datefns from "date-fns/fp";
 import { calculateTotalResultData } from "./calculateTotalResultData";
 
 export type Api = (data: {
