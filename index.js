@@ -2,7 +2,7 @@
  * @file 勤務記録表生成スクリプト
  */
 
-import $ from "ajax"
+import $ from "jquery"
 import moment from "moment"
 
 /**

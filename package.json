@@ -17,6 +17,7 @@
   "homepage": "https://github.com/daikenweb/castime-calculate-total-time#readme",
   "dependencies": {
     "ajax": "^0.0.4",
+    "jquery": "^3.6.0",
     "moment": "^2.29.1"
   }
 }
