@@ -1702,8 +1702,6 @@ export const calculateTotalResultData = ({output_type, start_date, end_date}) =>
       ///////////////////////////
       csv_body_str += "\n";
       
-      if(obj["data"]["review_state"] != null){ review_state = obj["data"]["review_state"]; }
-
       oneday_breakdown_list.push({
         date: obj["date"], //日付け
 
