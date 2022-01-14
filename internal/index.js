@@ -1,4 +1,4 @@
-import { default as moment } from "moment";
+import moment from "moment";
 
 export const OUT_WORK_AGG = function (n_w_b_obj, out_work_data) {
   //console.log("シフト外残業時間集計処理関数動作",tg_date,n_w_b_obj,out_work_data);
