@@ -1,3 +1,5 @@
+import {OUT_WORK_AGG, Deep_Night_AGG, CUSTOM_AGG} from './internal/index'
+
 /**
  * @file 勤務記録表生成スクリプト
  */
