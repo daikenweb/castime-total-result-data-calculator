@@ -1,6 +1,6 @@
 {
   "name": "@daikenweb/castime-total-result-data-calculator",
-  "version": "0.0.9-0",
+  "version": "0.0.9-1",
   "description": "",
   "main": "dist/index.js",
   "license": "ISC",
