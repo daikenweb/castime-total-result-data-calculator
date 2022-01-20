@@ -8,10 +8,10 @@ export type Api = (data: {
 }) => Promise<any>;
 
 export class TotalResultDataCalculator {
-  #api: Api;
+  _api: Api;
 
   constructor(api: Api) {
-    this.#api = api;
+    this._api = api;
   }
 
   async calculate({
@@ -25,7 +25,7 @@ export class TotalResultDataCalculator {
   }) {
     const fullDateFormat = datefns.format("yyyy-MM-dd");
     const beginOfFetch = datefns.subWeeks(1)(begin);
-    const res = await this.#api({
+    const res = await this._api({
       begin: fullDateFormat(beginOfFetch),
       end: fullDateFormat(end),
       targetId: userId,
