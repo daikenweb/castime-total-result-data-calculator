@@ -1,8 +1,11 @@
 {
   "name": "@daikenweb/castime-total-result-data-calculator",
   "version": "0.0.9-3",
-  "description": "",
-  "main": "dist/index.js",
+  "description": "Castime Total Result Data Calculator",
+  "module": "dist/index.js",
+  "engines": {
+    "node": ">= 16"
+  },
   "license": "ISC",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -12,7 +15,11 @@
     "type": "git",
     "url": "git+https://github.com/daikenweb/castime-total-result-data-calculator.git"
   },
-  "author": "Daikenweb",
+  "author": {
+    "name": "DAIKEN Co.,ltd.",
+    "email": "y-doi@daikenweb.com",
+    "url": "https://www.daikenweb.com"
+  },
   "bugs": {
     "url": "https://github.com/daikenweb/castime-total-result-data-calculator/issues"
   },
