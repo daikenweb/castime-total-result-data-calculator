@@ -1,6 +1,6 @@
 import { OUT_WORK_AGG, Deep_Night_AGG, CUSTOM_AGG } from "./internal/index";
 import * as $ from "jquery";
-import * as moment from "moment/dist/moment.js";
+import moment from "moment/dist/moment.js";
 
 /**
  * @file 勤務記録表生成スクリプト
