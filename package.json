@@ -1,6 +1,6 @@
 {
   "name": "@daikenweb/castime-total-result-data-calculator",
-  "version": "0.1.0-1",
+  "version": "0.1.0-2",
   "description": "Castime Total Result Data Calculator",
   "module": "dist/index.js",
   "browser": "dist/castime-total-result-data-calculator.js",
