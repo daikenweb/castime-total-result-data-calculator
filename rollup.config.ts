@@ -26,6 +26,7 @@ export default [
         tsconfig: "./tsconfig.json",
       }),
     ],
+    external: [...Object.keys(pkg.dependencies), "date-fns/fp"],
   },
   {
     input: "src/index.ts",
