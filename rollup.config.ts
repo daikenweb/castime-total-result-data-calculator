@@ -1,5 +1,6 @@
 import pluginTypescript from "@rollup/plugin-typescript";
-import pluginNodePolyfills from "@rollup/plugin-node-resolve"
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import { terser } from "rollup-plugin-terser";
 import * as pkg from "./package.json";
 
 const banner = `/*!
@@ -34,6 +35,14 @@ export default [
       sourcemap: "inline",
       banner,
     },
-    plugins: [pluginTypescript(), pluginNodePolyfills()],
+    plugins: [
+      pluginTypescript({
+        tsconfig: "./tsconfig.json",
+      }),
+      nodeResolve({
+        browser: true,
+      }),
+      terser(),
+    ],
   },
 ];
