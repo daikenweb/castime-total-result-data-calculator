@@ -2789,51 +2789,23 @@ export const calculateTotalResultData =
   
       csv_header_str += "給与計算用(分)\n";
       csv_header_str +=
-        "日中_通常(A)," +
-        (Math.floor(payroll_nomal / 60) +
-          ":" +
-          ("0" + (payroll_nomal % 60)).slice(-2)) +
-        "\n";
+        "日中_通常(A)," + (Math.floor(payroll_nomal / 60) + ":" + ("0" + (payroll_nomal % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "深夜_通常(B)," +
-        (Math.floor(payroll_midnight_nomal / 60) +
-          ":" +
-          ("0" + (payroll_midnight_nomal % 60)).slice(-2)) +
-        "\n";
+        "深夜_通常(B)," + (Math.floor(payroll_midnight_nomal / 60) + ":" + ("0" + (payroll_midnight_nomal % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "日中_残業(C)," +
-        (Math.floor(payroll_over / 60) +
-          ":" +
-          ("0" + (payroll_over % 60)).slice(-2)) +
-        "\n";
+       "日中_残業(C)," + (Math.floor(payroll_over / 60) + ":" + ("0" + (payroll_over % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "深夜_残業(D)," +
-        (Math.floor(payroll_midnight_over / 60) +
-          ":" +
-          ("0" + (payroll_midnight_over % 60)).slice(-2)) +
-        "\n";
+        "深夜_残業(D)," + (Math.floor(payroll_midnight_over / 60) + ":" + ("0" + (payroll_midnight_over % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "日中_休日(E)," +
-        (Math.floor(payroll_holiday / 60) +
-          ":" +
-          ("0" + (payroll_holiday % 60)).slice(-2)) +
-        "\n";
+        "日中_休日(E)," + (Math.floor(payroll_holiday / 60) + ":" + ("0" + (payroll_holiday % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "深夜_休日(F)," +
-        (Math.floor(payroll_midnight_holiday / 60) +
-          ":" +
-          ("0" + (payroll_midnight_holiday % 60)).slice(-2)) +
-        "\n";
+        "深夜_休日(F)," + (Math.floor(payroll_midnight_holiday / 60) + ":" + ("0" + (payroll_midnight_holiday % 60)).slice(-2)) + "\n";
       csv_header_str += "\n";
   
       csv_header_str += "時給計算帯(分)\n";
       $.each(custom_payroll, function (c_p_i, c_p_obj) {
         csv_header_str +=
-          c_p_obj["option"]["name"] +
-          "," +
-          (Math.floor(c_p_obj["agg_result"] / 60) +
-            ":" +
-            ("0" + (c_p_obj["agg_result"] % 60)).slice(-2));
+          c_p_obj["option"]["name"] + "," + (Math.floor(c_p_obj["agg_result"] / 60) + ":" + ("0" + (c_p_obj["agg_result"] % 60)).slice(-2));
         if (res["user_data"]["work_agg_salary_show"] == 1) {
           csv_header_str += ",(" + c_p_obj["salary"] + "円)";
         }
@@ -2856,238 +2828,74 @@ export const calculateTotalResultData =
   
       csv_header_str += "勤務時間(分)\n";
       csv_header_str +=
-        "勤務," +
-        (Math.floor(pro_work_time / 60) +
-          ":" +
-          ("0" + (pro_work_time % 60)).slice(-2)) +
-        "\n";
+        "勤務," + (Math.floor(pro_work_time / 60) + ":" + ("0" + (pro_work_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "休憩合計," +
-        (Math.floor(pro_break_time / 60) +
-          ":" +
-          ("0" + (pro_break_time % 60)).slice(-2)) +
-        "\n";
+        "休憩合計," + (Math.floor(pro_break_time / 60) + ":" + ("0" + (pro_break_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "シフト合計," +
-        (Math.floor(pro_shift_time / 60) +
-          ":" +
-          ("0" + (pro_shift_time % 60)).slice(-2)) +
-        "\n";
+        "シフト合計," + (Math.floor(pro_shift_time / 60) + ":" + ("0" + (pro_shift_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "所定労働時間," +
-        (Math.floor(pro_scheduled_work_time / 60) +
-          ":" +
-          ("0" + (pro_scheduled_work_time % 60)).slice(-2)) +
-        "\n";
+        "所定労働時間," + (Math.floor(pro_scheduled_work_time / 60) + ":" + ("0" + (pro_scheduled_work_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "残業時間," +
-        (Math.floor(pro_shift_over_work_time / 60) +
-          ":" +
-          ("0" + (pro_shift_over_work_time % 60)).slice(-2)) +
-        "\n";
+        "残業時間," + (Math.floor(pro_shift_over_work_time / 60) + ":" + ("0" + (pro_shift_over_work_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "シフト外残業," +
-        (Math.floor(works.over / 60) +
-          ":" +
-          ("0" + (works.over % 60)).slice(-2)) +
-        "\n";
+        "シフト外残業," + (Math.floor(works.over / 60) + ":" + ("0" + (works.over % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "法定外残業," +
-        (Math.floor(legal_works.over / 60) +
-          ":" +
-          ("0" + (legal_works.over % 60)).slice(-2)) +
-        "\n";
+        "法定外残業," + (Math.floor(legal_works.over / 60) + ":" + ("0" + (legal_works.over % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "深夜労働," +
-        (Math.floor(pro_late_night_work_time / 60) +
-          ":" +
-          ("0" + (pro_late_night_work_time % 60)).slice(-2)) +
-        "\n";
+        "深夜労働," + (Math.floor(pro_late_night_work_time / 60) + ":" + ("0" + (pro_late_night_work_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "休日労働," +
-        (Math.floor(pro_holiday_work_time / 60) +
-          ":" +
-          ("0" + (pro_holiday_work_time % 60)).slice(-2)) +
-        "\n";
+        "休日労働," + (Math.floor(pro_holiday_work_time / 60) + ":" + ("0" + (pro_holiday_work_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "所定休日労働," +
-        (Math.floor(pro_normal_holiday_work_time / 60) +
-          ":" +
-          ("0" + (pro_normal_holiday_work_time % 60)).slice(-2)) +
-        "\n";
+        "所定休日労働," + (Math.floor(pro_normal_holiday_work_time / 60) + ":" + ("0" + (pro_normal_holiday_work_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "全日欠勤," +
-        (Math.floor(pro_absence_time / 60) +
-          ":" +
-          ("0" + (pro_absence_time % 60)).slice(-2)) +
-        "\n";
+        "全日欠勤," + (Math.floor(pro_absence_time / 60) + ":" + ("0" + (pro_absence_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "欠勤," +
-        (Math.floor(pro_absence_not_all_day_time / 60) +
-          ":" +
-          ("0" + (pro_absence_not_all_day_time % 60)).slice(-2)) +
-        "\n";
+        "欠勤," + (Math.floor(pro_absence_not_all_day_time / 60) + ":" + ("0" + (pro_absence_not_all_day_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "遅刻," +
-        (Math.floor(pro_late_start_time / 60) +
-          ":" +
-          ("0" + (pro_late_start_time % 60)).slice(-2)) +
-        "\n";
+        "遅刻," + (Math.floor(pro_late_start_time / 60) + ":" + ("0" + (pro_late_start_time % 60)).slice(-2)) + "\n";
       csv_header_str +=
-        "早退," +
-        (Math.floor(pro_fast_end_time / 60) +
-          ":" +
-          ("0" + (pro_fast_end_time % 60)).slice(-2)) +
-        "\n\n";
+        "早退," + (Math.floor(pro_fast_end_time / 60) + ":" + ("0" + (pro_fast_end_time % 60)).slice(-2)) + "\n\n";
   
       if (res["holiday_unit_type"] == 0) {
         //分数単位
         /////////////////////////////
         csv_header_str += "休暇消化時間(集計月)(日)\n";
         csv_header_str +=
-          "有休消化," +
-          Math.floor(
-            (Number(yuuQ_time) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "有休消化," + Math.floor( (Number(yuuQ_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str +=
-          "振休消化," +
-          Math.floor(
-            (Number(furiQ_time) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "振休消化," + Math.floor( (Number(furiQ_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str +=
-          "代休消化," +
-          Math.floor(
-            (Number(daiQ_time) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "代休消化," + Math.floor( (Number(daiQ_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇付与時間(集計月)(日)\n";
         csv_header_str +=
-          "有休付与," +
-          Math.floor(
-            (Number(yuuQ_in_time) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "有休付与," + Math.floor( (Number(yuuQ_in_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str +=
-          "振休付与," +
-          Math.floor(
-            (Number(furiQ_in_time) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "振休付与," + Math.floor( (Number(furiQ_in_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str +=
-          "代休付与," +
-          Math.floor(
-            (Number(daiQ_in_time) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "代休付与," + Math.floor( (Number(daiQ_in_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇残時間(集計時点)(日)\n";
         csv_header_str +=
-          "有休残数," +
-          Math.floor(
-            (Number(res["Q_log"]["tg_month_yuuQ_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "有休残数," + Math.floor( (Number(res["Q_log"]["tg_month_yuuQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str +=
-          "振休残数," +
-          Math.floor(
-            (Number(res["Q_log"]["tg_month_furiQ_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "振休残数," + Math.floor( (Number(res["Q_log"]["tg_month_furiQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str +=
-          "代休残数," +
-          Math.floor(
-            (Number(res["Q_log"]["tg_month_daiQ_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          "\n";
+          "代休残数," + Math.floor( (Number(res["Q_log"]["tg_month_daiQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇残時間(出力日時点)(日)\n";
         csv_header_str +=
-          "有休残数," +
-          Math.floor(
-            (Number(res["Q_log"]["yuuQ_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          ",(消化予定:" +
-          (Math.floor(
-            (Number(res["Q_log"]["yuuQ_plan_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10) *
-            -1 +
-          ")" +
-          "\n";
+          "有休残数," + Math.floor( (Number(res["Q_log"]["yuuQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + 
+          ",(消化予定:" + (Math.floor( (Number(res["Q_log"]["yuuQ_plan_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10) * -1 + ")" + "\n";
         csv_header_str +=
-          "振休残数," +
-          Math.floor(
-            (Number(res["Q_log"]["huriQ_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          ",(消化予定:" +
-          (Math.floor(
-            (Number(res["Q_log"]["huriQ_plan_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10) *
-            -1 +
-          ")" +
-          "\n";
+          "振休残数," + Math.floor( (Number(res["Q_log"]["huriQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + 
+          ",(消化予定:" + (Math.floor( (Number(res["Q_log"]["huriQ_plan_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10) * -1 + ")" + "\n";
         csv_header_str +=
-          "代休残数," +
-          Math.floor(
-            (Number(res["Q_log"]["daiQ_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10 +
-          ",(消化予定:" +
-          (Math.floor(
-            (Number(res["Q_log"]["daiQ_plan_number"]) /
-              Number(res["user_data"]["workminutes_per_day"])) *
-              10
-          ) /
-            10) *
-            -1 +
-          ")" +
-          "\n\n";
+          "代休残数," + Math.floor( (Number(res["Q_log"]["daiQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 +
+          ",(消化予定:" + (Math.floor( (Number(res["Q_log"]["daiQ_plan_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10) * -1 + ")" + "\n\n";
       } else if (res["holiday_unit_type"] == 1) {
         //日数単位
         /////////////////////////////
@@ -3120,26 +2928,14 @@ export const calculateTotalResultData =
         /////////////////////////////
         csv_header_str += "休暇残時間(出力日時点)(日)\n";
         csv_header_str +=
-          "有休残数," +
-          Number(res["Q_log"]["yuuQ_number"]) / 2 +
-          ",(消化予定:" +
-          (Number(res["Q_log"]["yuuQ_plan_number"]) / 2) * -1 +
-          ")" +
-          "\n";
+          "有休残数," + Number(res["Q_log"]["yuuQ_number"]) / 2 +
+          ",(消化予定:" + (Number(res["Q_log"]["yuuQ_plan_number"]) / 2) * -1 + ")" + "\n";
         csv_header_str +=
-          "振休残数," +
-          Number(res["Q_log"]["huriQ_number"]) / 2 +
-          ",(消化予定:" +
-          (Number(res["Q_log"]["huriQ_plan_number"]) / 2) * -1 +
-          ")" +
-          "\n";
+          "振休残数," + Number(res["Q_log"]["huriQ_number"]) / 2 +
+          ",(消化予定:" + (Number(res["Q_log"]["huriQ_plan_number"]) / 2) * -1 + ")" + "\n";
         csv_header_str +=
-          "代休残数," +
-          Number(res["Q_log"]["daiQ_number"]) / 2 +
-          ",(消化予定:" +
-          (Number(res["Q_log"]["daiQ_plan_number"]) / 2) * -1 +
-          ")" +
-          "\n\n";
+          "代休残数," + Number(res["Q_log"]["daiQ_number"]) / 2 +
+          ",(消化予定:" + (Number(res["Q_log"]["daiQ_plan_number"]) / 2) * -1 + ")" + "\n\n";
       }
       /////////////////////////////
       csv_header_str += "特殊日集計\n";
@@ -3157,11 +2953,8 @@ export const calculateTotalResultData =
 
       for (let report_breakdown of report_label_data) {
         csv_report_label_breakdown_str +=
-          report_breakdown["label_name"] +
-          "," +
-          Math.floor(Number(report_breakdown["total_time"]) / 60) +
-          ":" +
-          ("0" + (Number(report_breakdown["total_time"]) % 60)).slice(-2) +
+          report_breakdown["label_name"] + "," +
+          Math.floor(Number(report_breakdown["total_time"]) / 60) + ":" + ("0" + (Number(report_breakdown["total_time"]) % 60)).slice(-2) +
           "\n";
       }
       csv_report_label_breakdown_str += "\n";
@@ -3173,22 +2966,14 @@ export const calculateTotalResultData =
       }
       csv_report_label_breakdown_str += "\n";
       for (let onday_obj of oneday_breakdown_list) {
-        //csv_report_label_breakdown_str += onday_obj["date"] + ",";
         const days = ["(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(土)"];
         csv_report_label_breakdown_str +=
-          ("0" + onday_obj["date"].split("-")[1]).slice(-2) +
-          "月" +
-          ("0" + onday_obj["date"].split("-")[2]).slice(-2) +
-          "日" +
-          days[new Date(onday_obj["date"]).getDay()];
+          ("0" + onday_obj["date"].split("-")[1]).slice(-2) + "月" + ("0" + onday_obj["date"].split("-")[2]).slice(-2) + "日" + days[new Date(onday_obj["date"]).getDay()];
         csv_report_label_breakdown_str += ",";
         for (let report_breakdown of report_label_data) {
-          //csv_report_label_breakdown_str += 0 + ",";
           let f = 1;
           for (let oneday_report_label_obj of onday_obj["report_label_data"]) {
-            if (
-              report_breakdown["label_id"] == oneday_report_label_obj["label_id"]
-            ) {
+            if ( report_breakdown["label_id"] == oneday_report_label_obj["label_id"] ) {
               f = 0;
               csv_report_label_breakdown_str +=
                 oneday_report_label_obj["total_time"] + ",";
