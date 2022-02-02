@@ -457,7 +457,7 @@ export const calculateTotalResultData =
       } else {
         line_result = obj["result_start"].substr(11, 5) + "～" + true_end_time;
       }
-      
+
       ///////////////////////////////////
       //6_20追加_休日出勤申請必須設定だった場合、プランなしの日はすべて打刻をなかったことに
       ///////
@@ -3083,58 +3083,6 @@ export const calculateTotalResultData =
     });
     csv_header_str += "\n\n";
 
-    /////////////////////////////
-    //日報ラベル集計
-    let csv_report_label_breakdown_str = "\n\n日報ラベル集計(分)\n";
-
-    for (let report_breakdown of report_label_data) {
-      csv_report_label_breakdown_str +=
-        report_breakdown["label_name"] +
-        "," +
-        Math.floor(Number(report_breakdown["total_time"]) / 60) +
-        ":" +
-        ("0" + (Number(report_breakdown["total_time"]) % 60)).slice(-2) +
-        "\n";
-    }
-    csv_report_label_breakdown_str += "\n";
-
-    //日報ラベル集計日別内わけ
-    csv_report_label_breakdown_str += "日報ラベル集計日別内わけ(分)\n日付,";
-    for (let report_breakdown of report_label_data) {
-      csv_report_label_breakdown_str += report_breakdown["label_name"] + ",";
-    }
-    csv_report_label_breakdown_str += "\n";
-    for (let onday_obj of oneday_breakdown_list) {
-      //csv_report_label_breakdown_str += onday_obj["date"] + ",";
-      const days = ["(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(土)"];
-      csv_report_label_breakdown_str +=
-        ("0" + onday_obj["date"].split("-")[1]).slice(-2) +
-        "月" +
-        ("0" + onday_obj["date"].split("-")[2]).slice(-2) +
-        "日" +
-        days[new Date(onday_obj["date"]).getDay()];
-      csv_report_label_breakdown_str += ",";
-      for (let report_breakdown of report_label_data) {
-        //csv_report_label_breakdown_str += 0 + ",";
-        let f = 1;
-        for (let oneday_report_label_obj of onday_obj["report_label_data"]) {
-          if (
-            report_breakdown["label_id"] == oneday_report_label_obj["label_id"]
-          ) {
-            f = 0;
-            csv_report_label_breakdown_str +=
-              oneday_report_label_obj["total_time"] + ",";
-          }
-        }
-        if (f) {
-          csv_report_label_breakdown_str += 0 + ",";
-        } //一日毎のほうにデータがない場合は0を入れておく
-      }
-      csv_report_label_breakdown_str += "\n";
-    }
-
-    /////////////////////////////
-
     //console.log("特殊日集計",pro_exday_number_array);
 
     ///////////////////////////////////////////////////////////////
@@ -3196,15 +3144,66 @@ export const calculateTotalResultData =
     }
     ///////////////////////////////////////////////////////////////
 
+    console.log("CSV確認1",csv_header_str,csv_body_str);
     //CSV出力
     if (output_type == "CSV") {
-      let csv_str =
-        csv_header_str + csv_body_str + csv_report_label_breakdown_str;
-      //console.log(csv_str);
-      Export(
-        "勤務実績_" + res["user_name"] + "_" + target_month + ".csv",
-        csv_str
-      );
+
+      /////////////////////////////
+      //日報ラベル集計
+      let csv_report_label_breakdown_str = "\n\n日報ラベル集計(分)\n";
+
+      for (let report_breakdown of report_label_data) {
+        csv_report_label_breakdown_str +=
+          report_breakdown["label_name"] +
+          "," +
+          Math.floor(Number(report_breakdown["total_time"]) / 60) +
+          ":" +
+          ("0" + (Number(report_breakdown["total_time"]) % 60)).slice(-2) +
+          "\n";
+      }
+      csv_report_label_breakdown_str += "\n";
+
+      //日報ラベル集計日別内わけ
+      csv_report_label_breakdown_str += "日報ラベル集計日別内わけ(分)\n日付,";
+      for (let report_breakdown of report_label_data) {
+        csv_report_label_breakdown_str += report_breakdown["label_name"] + ",";
+      }
+      csv_report_label_breakdown_str += "\n";
+      for (let onday_obj of oneday_breakdown_list) {
+        //csv_report_label_breakdown_str += onday_obj["date"] + ",";
+        const days = ["(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(土)"];
+        csv_report_label_breakdown_str +=
+          ("0" + onday_obj["date"].split("-")[1]).slice(-2) +
+          "月" +
+          ("0" + onday_obj["date"].split("-")[2]).slice(-2) +
+          "日" +
+          days[new Date(onday_obj["date"]).getDay()];
+        csv_report_label_breakdown_str += ",";
+        for (let report_breakdown of report_label_data) {
+          //csv_report_label_breakdown_str += 0 + ",";
+          let f = 1;
+          for (let oneday_report_label_obj of onday_obj["report_label_data"]) {
+            if (
+              report_breakdown["label_id"] == oneday_report_label_obj["label_id"]
+            ) {
+              f = 0;
+              csv_report_label_breakdown_str +=
+                oneday_report_label_obj["total_time"] + ",";
+            }
+          }
+          if (f) {
+            csv_report_label_breakdown_str += 0 + ",";
+          } //一日毎のほうにデータがない場合は0を入れておく
+        }
+        csv_report_label_breakdown_str += "\n";
+      }
+
+      /////////////////////////////
+
+      let csv_str = csv_header_str + csv_body_str + csv_report_label_breakdown_str;
+      console.log("CSV確認2",csv_str);
+
+      //Export("勤務実績_" + res["user_name"] + "_" + target_month + ".csv",csv_str);
     }
 
     let res_data = {
