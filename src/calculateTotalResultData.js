@@ -457,8 +457,187 @@ export const calculateTotalResultData =
       } else {
         line_result = obj["result_start"].substr(11, 5) + "～" + true_end_time;
       }
+      
+      ///////////////////////////////////
+      //6_20追加_休日出勤申請必須設定だった場合、プランなしの日はすべて打刻をなかったことに
+      ///////
+      //デバッグ用
+      //res["user_data"]["required_request"] = {holiday_work:0,over_work:1};
+      ///////
 
-      //勤務状況
+      if (res["user_data"]["required_request"] != null) {
+        if (res["user_data"]["required_request"]["holiday_work"] == 1) {
+          //休日出勤申請必須
+          if (obj["plan_start"] == "" || obj["plan_end"] == "") {
+            //集計に影響が出そうな項目を全て、打刻がなかったものとして定義しなおし
+            obj["over_start"] = "";
+            obj["over_end"] = "";
+            obj["result_start"] = "";
+            obj["result_end"] = "";
+            obj["work_time"] = 0;
+            //obj["break_time"] = 0; //集計上で使用しなくなったためコメントアウト
+            obj["bad_start"] = 0;
+            obj["bad_end"] = 0;
+            obj["direct_start"] = 0;
+            obj["direct_end"] = 0;
+            if (obj["data"]["over_time"] != null) {
+              obj["data"]["over_time"] = {
+                not_over_calc: obj["data"]["over_time"]["not_over_calc"],
+              };
+            }
+          }
+        }
+      }
+
+      ///////////////////////////////////
+      //console.log("残業処理確認",obj["date"]);
+
+      let a_r_total_break_time = 0;
+      ////////////////////////////////////////////
+      //6_17_新形式残業ボーダーによる退勤位置割り出し処理
+      if (obj["plan_start"] != "" && obj["plan_end"] != "") {
+        //シフトはある
+        if (obj["result_start"] != "" && obj["result_end"] != "") {
+          //実績はある
+          var judg_result_end = obj["result_end"];
+          if (moment(obj["plan_end"]) < moment(obj["result_end"])) {
+            //定時後に打刻
+            if (obj["data"]["over_time"] != null) {
+              if (obj["data"]["over_time"]["not_over_calc"] == "f") {
+                judg_result_end = obj["plan_end"];
+              } //切り捨て
+              else if (obj["data"]["over_time"]["not_over_calc"] == "c") {
+                judg_result_end = obj["result_end"];
+              } //切り上げ(このような設定ができるようには想定していないため、あったとしてもそのままと同じ処理に)
+              else if (obj["data"]["over_time"]["not_over_calc"] == "n") {
+                judg_result_end = obj["result_end"];
+              } //そのまま(なにもしない)
+
+              if (obj["data"]["over_time"]["auto"]) {
+                if (
+                  moment(obj["data"]["over_time"]["auto"]["end"]) <
+                  moment(obj["result_end"])
+                ) {
+                  //残業終了時刻後に打刻
+                  if (obj["data"]["over_time"]["not_over_calc"] == "f") {
+                    judg_result_end = obj["data"]["over_time"]["auto"]["end"];
+                  } //切り捨て
+                  else if (obj["data"]["over_time"]["not_over_calc"] == "c") {
+                    judg_result_end = obj["result_end"];
+                  } //切り上げ(このような設定ができるようには想定していないため、あったとしてもそのままと同じ処理に)
+                  else if (obj["data"]["over_time"]["not_over_calc"] == "n") {
+                    judg_result_end = obj["result_end"];
+                  } //そのまま(なにもしない)
+                } else {
+                  //残業時刻未満に打刻
+                  if (obj["data"]["over_time"]["auto"]["over_calc"] == "f") {
+                    judg_result_end = obj["plan_end"];
+                  } //切り捨て
+                  if (obj["data"]["over_time"]["auto"]["over_calc"] == "c") {
+                    judg_result_end = obj["data"]["over_time"]["auto"]["end"];
+                  } //切り上げ
+                  else if (
+                    obj["data"]["over_time"]["auto"]["over_calc"] == "n"
+                  ) {
+                    judg_result_end = obj["result_end"];
+                  } //そのまま
+                }
+              }
+
+              if (obj["data"]["over_time"]["request"]) {
+                if (
+                  moment(obj["data"]["over_time"]["request"]["end"]) <
+                  moment(obj["result_end"])
+                ) {
+                  //申請残業終了時刻後に打刻
+                  if (obj["data"]["over_time"]["not_over_calc"] == "f") {
+                    judg_result_end =
+                      obj["data"]["over_time"]["request"]["end"];
+                  } //切り捨て
+                  else if (obj["data"]["over_time"]["not_over_calc"] == "c") {
+                    judg_result_end = obj["result_end"];
+                  } //切り上げ(このような設定ができるようには想定していないため、あったとしてもそのままと同じ処理に)
+                  else if (obj["data"]["over_time"]["not_over_calc"] == "n") {
+                    judg_result_end = obj["result_end"];
+                  } //そのまま(なにもしない)
+                } else {
+                  //申請残業時刻未満に打刻
+                  if (obj["data"]["over_time"]["request"]["over_calc"] == "f") {
+                    //切り捨て
+                    if (obj["data"]["over_time"]["auto"]) {
+                      if (
+                        moment(obj["data"]["over_time"]["auto"]["end"]) <
+                        moment(obj["result_end"])
+                      ) {
+                        //残業終了時刻後に打刻
+                        judg_result_end =
+                          obj["data"]["over_time"]["auto"]["end"]; //残業終了時刻に切り捨て
+                      } else {
+                      } //残業終了未満の場合はすでに処理済みのためここでは処理しない
+                    } else {
+                      judg_result_end = obj["plan_end"]; //定時に切り捨て
+                    }
+                  } else if (
+                    obj["data"]["over_time"]["request"]["over_calc"] == "c"
+                  ) {
+                    judg_result_end =
+                      obj["data"]["over_time"]["request"]["end"];
+                  } //切り上げ
+                  else if (
+                    obj["data"]["over_time"]["request"]["over_calc"] == "n"
+                  ) {
+                    judg_result_end = obj["result_end"];
+                  } //そのまま
+                }
+              }
+            }
+          }
+          obj["result_end"] = judg_result_end;
+          //console.log("丸め退勤時間確認",obj["result_end"]);
+          /////////////
+          //退勤時間を丸めたことで勤務外になってしまった休憩は削除
+          var a_r_break_time = [];
+          $.each(
+            obj["data"]["result_breaktime"],
+            function (r_breaktime_i, r_breaktime_obj) {
+              if (
+                moment(obj["result_start"]) <
+                  moment(r_breaktime_obj["start"]) &&
+                moment(r_breaktime_obj["end"]) < moment(obj["result_end"])
+              ) {
+                //console.log("勤務内:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]);
+                a_r_break_time.push(r_breaktime_obj);
+              } //else { console.log("勤務外:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]); }
+            }
+          );
+          obj["data"]["result_breaktime"] = a_r_break_time;
+
+          for (let r_breaktime_obj of obj["data"]["result_breaktime"]) {
+            a_r_total_break_time += Number(r_breaktime_obj["total_time"]);
+          }
+          /////////////
+          var alone_true_start = obj["plan_start"];
+          if (moment(obj["plan_start"]) < moment(obj["result_start"])) {
+            alone_true_start = obj["result_start"];
+          }
+          obj["work_time"] =
+            Math.floor(
+              (moment(obj["result_end"]) - moment(alone_true_start)) / 60000
+            ) - Number(a_r_total_break_time);
+        }
+      }
+      ////////////////////////////////////////////
+      //console.log("動作確認");
+
+      //グループ表記生成
+      var line_group = "";
+      if (res["group_data"] != null) {
+        line_group = res["group_data"].name;
+      } else {
+        line_group = "----";
+      }
+
+      //勤務状況表記生成
       var line_state = "";
       var state_error_flag = 0; //欠勤だった場合は1に
       var in_date_search = function (days, tday) {
@@ -662,185 +841,6 @@ export const calculateTotalResultData =
           }
         }
       }
-
-      //グループ
-      var line_group = "";
-      if (res["group_data"] != null) {
-        line_group = res["group_data"].name;
-      } else {
-        line_group = "----";
-      }
-
-      ///////////////////////////////////
-      //6_20追加_休日出勤申請必須設定だった場合、プランなしの日はすべて打刻をなかったことに
-      ///////
-      //デバッグ用
-      //res["user_data"]["required_request"] = {holiday_work:0,over_work:1};
-      ///////
-
-      if (res["user_data"]["required_request"] != null) {
-        if (res["user_data"]["required_request"]["holiday_work"] == 1) {
-          //休日出勤申請必須
-          if (obj["plan_start"] == "" || obj["plan_end"] == "") {
-            //集計に影響が出そうな項目を全て、打刻がなかったものとして定義しなおし
-            obj["over_start"] = "";
-            obj["over_end"] = "";
-            obj["result_start"] = "";
-            obj["result_end"] = "";
-            obj["work_time"] = 0;
-            //obj["break_time"] = 0; //集計上で使用しなくなったためコメントアウト
-            obj["bad_start"] = 0;
-            obj["bad_end"] = 0;
-            obj["direct_start"] = 0;
-            obj["direct_end"] = 0;
-            if (obj["data"]["over_time"] != null) {
-              obj["data"]["over_time"] = {
-                not_over_calc: obj["data"]["over_time"]["not_over_calc"],
-              };
-            }
-          }
-        }
-      }
-
-      ///////////////////////////////////
-      //console.log("残業処理確認",obj["date"]);
-
-      let a_r_total_break_time = 0;
-      ////////////////////////////////////////////
-      //6_17_新形式残業ボーダーによる退勤位置割り出し処理
-      if (obj["plan_start"] != "" && obj["plan_end"] != "") {
-        //シフトはある
-        if (obj["result_start"] != "" && obj["result_end"] != "") {
-          //実績はある
-          var judg_result_end = obj["result_end"];
-          if (moment(obj["plan_end"]) < moment(obj["result_end"])) {
-            //定時後に打刻
-            if (obj["data"]["over_time"] != null) {
-              if (obj["data"]["over_time"]["not_over_calc"] == "f") {
-                judg_result_end = obj["plan_end"];
-              } //切り捨て
-              else if (obj["data"]["over_time"]["not_over_calc"] == "c") {
-                judg_result_end = obj["result_end"];
-              } //切り上げ(このような設定ができるようには想定していないため、あったとしてもそのままと同じ処理に)
-              else if (obj["data"]["over_time"]["not_over_calc"] == "n") {
-                judg_result_end = obj["result_end"];
-              } //そのまま(なにもしない)
-
-              if (obj["data"]["over_time"]["auto"]) {
-                if (
-                  moment(obj["data"]["over_time"]["auto"]["end"]) <
-                  moment(obj["result_end"])
-                ) {
-                  //残業終了時刻後に打刻
-                  if (obj["data"]["over_time"]["not_over_calc"] == "f") {
-                    judg_result_end = obj["data"]["over_time"]["auto"]["end"];
-                  } //切り捨て
-                  else if (obj["data"]["over_time"]["not_over_calc"] == "c") {
-                    judg_result_end = obj["result_end"];
-                  } //切り上げ(このような設定ができるようには想定していないため、あったとしてもそのままと同じ処理に)
-                  else if (obj["data"]["over_time"]["not_over_calc"] == "n") {
-                    judg_result_end = obj["result_end"];
-                  } //そのまま(なにもしない)
-                } else {
-                  //残業時刻未満に打刻
-                  if (obj["data"]["over_time"]["auto"]["over_calc"] == "f") {
-                    judg_result_end = obj["plan_end"];
-                  } //切り捨て
-                  if (obj["data"]["over_time"]["auto"]["over_calc"] == "c") {
-                    judg_result_end = obj["data"]["over_time"]["auto"]["end"];
-                  } //切り上げ
-                  else if (
-                    obj["data"]["over_time"]["auto"]["over_calc"] == "n"
-                  ) {
-                    judg_result_end = obj["result_end"];
-                  } //そのまま
-                }
-              }
-
-              if (obj["data"]["over_time"]["request"]) {
-                if (
-                  moment(obj["data"]["over_time"]["request"]["end"]) <
-                  moment(obj["result_end"])
-                ) {
-                  //申請残業終了時刻後に打刻
-                  if (obj["data"]["over_time"]["not_over_calc"] == "f") {
-                    judg_result_end =
-                      obj["data"]["over_time"]["request"]["end"];
-                  } //切り捨て
-                  else if (obj["data"]["over_time"]["not_over_calc"] == "c") {
-                    judg_result_end = obj["result_end"];
-                  } //切り上げ(このような設定ができるようには想定していないため、あったとしてもそのままと同じ処理に)
-                  else if (obj["data"]["over_time"]["not_over_calc"] == "n") {
-                    judg_result_end = obj["result_end"];
-                  } //そのまま(なにもしない)
-                } else {
-                  //申請残業時刻未満に打刻
-                  if (obj["data"]["over_time"]["request"]["over_calc"] == "f") {
-                    //切り捨て
-                    if (obj["data"]["over_time"]["auto"]) {
-                      if (
-                        moment(obj["data"]["over_time"]["auto"]["end"]) <
-                        moment(obj["result_end"])
-                      ) {
-                        //残業終了時刻後に打刻
-                        judg_result_end =
-                          obj["data"]["over_time"]["auto"]["end"]; //残業終了時刻に切り捨て
-                      } else {
-                      } //残業終了未満の場合はすでに処理済みのためここでは処理しない
-                    } else {
-                      judg_result_end = obj["plan_end"]; //定時に切り捨て
-                    }
-                  } else if (
-                    obj["data"]["over_time"]["request"]["over_calc"] == "c"
-                  ) {
-                    judg_result_end =
-                      obj["data"]["over_time"]["request"]["end"];
-                  } //切り上げ
-                  else if (
-                    obj["data"]["over_time"]["request"]["over_calc"] == "n"
-                  ) {
-                    judg_result_end = obj["result_end"];
-                  } //そのまま
-                }
-              }
-            }
-          }
-          obj["result_end"] = judg_result_end;
-          //console.log("丸め退勤時間確認",obj["result_end"]);
-          /////////////
-          //退勤時間を丸めたことで勤務外になってしまった休憩は削除
-          var a_r_break_time = [];
-          $.each(
-            obj["data"]["result_breaktime"],
-            function (r_breaktime_i, r_breaktime_obj) {
-              if (
-                moment(obj["result_start"]) <
-                  moment(r_breaktime_obj["start"]) &&
-                moment(r_breaktime_obj["end"]) < moment(obj["result_end"])
-              ) {
-                //console.log("勤務内:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]);
-                a_r_break_time.push(r_breaktime_obj);
-              } //else { console.log("勤務外:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]); }
-            }
-          );
-          obj["data"]["result_breaktime"] = a_r_break_time;
-
-          for (let r_breaktime_obj of obj["data"]["result_breaktime"]) {
-            a_r_total_break_time += Number(r_breaktime_obj["total_time"]);
-          }
-          /////////////
-          var alone_true_start = obj["plan_start"];
-          if (moment(obj["plan_start"]) < moment(obj["result_start"])) {
-            alone_true_start = obj["result_start"];
-          }
-          obj["work_time"] =
-            Math.floor(
-              (moment(obj["result_end"]) - moment(alone_true_start)) / 60000
-            ) - Number(a_r_total_break_time);
-        }
-      }
-      ////////////////////////////////////////////
-      //console.log("動作確認");
 
       var line_break_time = "";
       if (state_error_flag) {
