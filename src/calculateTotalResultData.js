@@ -201,16 +201,18 @@ export const calculateTotalResultData =
                 if (exday_list_obj["id"] == tg_exday_obj) {
                   line_exday_state += "[" + exday_list_obj["name"] + "]"; //一日毎の表記
                 }
-                if (
-                  exday_list_obj["id"] == tg_exday_obj &&
-                  exday_list_obj["data"]["hidden"] == "0"
-                ) {
-                  pro_exday_number_array[exday_list_i]["number"] =
-                    pro_exday_number_array[exday_list_i]["number"] + 1; //一カ月分集計
-                }
               }
             );
           });
+
+          for(let none_hidden_exday_obj  of pro_exday_number_array){ //一カ月分集計
+            for(let tg_exday_obj  of obj["data"]["exday"].split(",")){
+              if ( none_hidden_exday_obj["id"] == tg_exday_obj ) {
+                none_hidden_exday_obj["number"] = none_hidden_exday_obj["number"] + 1;
+              }
+            }
+          }
+
         }
       }
 
