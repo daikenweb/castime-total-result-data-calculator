@@ -991,23 +991,33 @@ export const calculateTotalResultData =
         if(res["shift_template_data"]["working_type"] == 1){
           //console.log("変形労働制");
 
-          ONEDAY_NORMAL = obj["normal_work_limit"];
+          
+          if(obj["normal_work_limit"] < 8*60){
+            ONEDAY_NORMAL = 8*60; //日の上限が8時間を下回る場合は8時間で代入
+          } else {
+            ONEDAY_NORMAL = obj["normal_work_limit"];
+          }
           
           if (res["user_data"].work_begin.day == weeks[moment(obj["date"]).day()]) {
             //console.log("週毎の勤務時間上限ストック初期化",obj["date"],obj);
             //この週の法定内労働時間の上限を計算
-            WEEK_NORMAL = 0;
+            let limitWeekNormal = 0;
             for(let objWorkRecord of res["work_record"]){
               if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) < moment(obj["date"]).add(7, 'days')){
                 //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
-                WEEK_NORMAL = WEEK_NORMAL + objWorkRecord["normal_work_limit"];
+                limitWeekNormal = limitWeekNormal + objWorkRecord["normal_work_limit"];
               }
+            }
+            if(limitWeekNormal < 40*60){
+              WEEK_NORMAL = 40*60; //週の上限が40時間を下回る場合は8時間で代入
+            } else {
+              WEEK_NORMAL = limitWeekNormal;
             }
             //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
           }
         }
       }
-      console.log(obj["date"],"日の上限" + ONEDAY_NORMAL,"週の上限" + WEEK_NORMAL + "分(" + WEEK_NORMAL / 60 + "時間)");
+      console.log(obj["date"],"給与計算用の上限","日の上限" + ONEDAY_NORMAL,"週の上限" + WEEK_NORMAL + "分(" + WEEK_NORMAL / 60 + "時間)");
 
       //A,B,C,D,E,F算出
       if (Number(obj["work_time"]) > 0) {
