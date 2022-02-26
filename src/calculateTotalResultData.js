@@ -123,6 +123,11 @@ export const calculateTotalResultData =
       d: date.getDate(),
     };
 
+
+    //給与計算用集計
+    let WEEK_NORMAL = 40 * 60; // 週の規定労働時間(分単位);
+    let ONEDAY_NORMAL = 8 * 60; // 日の規定労働時間(分単位);
+
     let stock_week_nomal = 0; //給与計算の際の、週労働時間計算用
 
     /**********************************************************/
@@ -858,8 +863,6 @@ export const calculateTotalResultData =
       //////////////////////////////////////////////////////
       //////////////////////////////////////////////////////
       //給与計算用集計
-      let WEEK_NORMAL = 40 * 60; // 週の規定労働時間(分単位);
-      let ONEDAY_NORMAL = 8 * 60; // 日の規定労働時間(分単位);
       let weeks = [
         "sunday",
         "monday",
@@ -983,11 +986,34 @@ export const calculateTotalResultData =
         //console.log("週毎の勤務時間上限ストック初期化");
       }
 
+      //変形労働制の場合は日の上限、週の上限を上書き
+      if(res["shift_template_data"]["working_type"] != null){
+        if(res["shift_template_data"]["working_type"] == 1){
+          //console.log("変形労働制");
+
+          ONEDAY_NORMAL = obj["normal_work_limit"];
+          
+          if (res["user_data"].work_begin.day == weeks[moment(obj["date"]).day()]) {
+            //console.log("週毎の勤務時間上限ストック初期化",obj["date"],obj);
+            //この週の法定内労働時間の上限を計算
+            WEEK_NORMAL = 0;
+            for(let objWorkRecord of res["work_record"]){
+              if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) < moment(obj["date"]).add(7, 'days')){
+                //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
+                WEEK_NORMAL = WEEK_NORMAL + objWorkRecord["normal_work_limit"];
+              }
+            }
+            //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
+          }
+        }
+      }
+      console.log(obj["date"],"日の上限" + ONEDAY_NORMAL,"週の上限" + WEEK_NORMAL + "分(" + WEEK_NORMAL / 60 + "時間)");
+
       //A,B,C,D,E,F算出
       if (Number(obj["work_time"]) > 0) {
         //通常勤務時間（残業時間ではない）を抽出
-        //ONEDAY_NORMAL = 8*60;// 日の規定労働時間(分単位); 事前の残業集計で定義済み
-        //WEEK_NORMAL = 40*60;// 週の規定労働時間(分単位); 事前の残業集計で定義済み
+        //ONEDAY_NORMAL = 8*60;// 日の規定労働時間(分単位) ※変形労働制の場合は可変
+        //WEEK_NORMAL = 40*60;// 週の規定労働時間(分単位) ※変形労働制の場合は可変
         var stock_oneday_nomal = 0; //日毎の勤務時間上限ストック
         var nomal_work_time_breakdown = []; //通常勤務時間内わけ配列
 
