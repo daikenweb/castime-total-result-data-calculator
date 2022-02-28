@@ -4,6 +4,7 @@
   "description": "Castime Total Result Data Calculator",
   "module": "dist/index.js",
   "browser": "dist/castime-total-result-data-calculator.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "engines": {
     "node": ">= 16"

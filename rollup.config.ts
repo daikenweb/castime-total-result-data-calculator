@@ -48,4 +48,24 @@ export default [
       terser(),
     ],
   },
+  {
+    input: "src/index.ts",
+    output: {
+      name: "castime-total-result-data-calculator",
+      file: pkg.main,
+      format: "cjs",
+      sourcemap: "inline",
+      banner,
+    },
+    plugins: [
+      pluginTypescript({
+        tsconfig: "./tsconfig.json",
+      }),
+      nodeResolve({
+        browser: true,
+      }),
+      commonjs(),
+      terser(),
+    ],
+  },
 ];
