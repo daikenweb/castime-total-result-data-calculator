@@ -128,6 +128,9 @@ export const calculateTotalResultData =
     let WEEK_NORMAL = 40 * 60; // 週の規定労働時間(分単位);
     let ONEDAY_NORMAL = 8 * 60; // 日の規定労働時間(分単位);
 
+    let NumbermonthNormalWorklimit = 0; //月の上限
+    let arrayWeekNormalWorklimit = []; //週毎の上限
+
     let stock_week_nomal = 0; //給与計算の際の、週労働時間計算用
 
     /**********************************************************/
@@ -1003,7 +1006,7 @@ export const calculateTotalResultData =
             //この週の法定内労働時間の上限を計算
             let limitWeekNormal = 0;
             for(let objWorkRecord of res["work_record"]){
-              if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) < moment(obj["date"]).add(7, 'days')){
+              if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) <= moment(obj["date"]).add(6, 'days')){
                 //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
                 limitWeekNormal = limitWeekNormal + objWorkRecord["normal_work_limit"];
               }
@@ -1014,10 +1017,16 @@ export const calculateTotalResultData =
               WEEK_NORMAL = limitWeekNormal;
             }
             //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
+
+            arrayWeekNormalWorklimit.push({
+              start: obj["date"],
+              end: moment(obj["date"]).add(6, 'days').format("YYYY-MM-DD"),
+              total_limit_time: limitWeekNormal,
+            });
           }
         }
       }
-      console.log(obj["date"],"給与計算用の上限","日の上限" + ONEDAY_NORMAL,"週の上限" + WEEK_NORMAL + "分(" + WEEK_NORMAL / 60 + "時間)");
+      //console.log(obj["date"],"給与計算用の上限","日の上限" + ONEDAY_NORMAL,"週の上限" + WEEK_NORMAL + "分(" + WEEK_NORMAL / 60 + "時間)");
 
       //A,B,C,D,E,F算出
       if (Number(obj["work_time"]) > 0) {
@@ -1287,6 +1296,8 @@ export const calculateTotalResultData =
       //それぞれ月ごと集計の変数に加算
       if (!obj["pre_calc"]) {
         //本ループ
+        NumbermonthNormalWorklimit = NumbermonthNormalWorklimit + Number(obj["normal_work_limit"]); //月合計の上限
+
         payroll_nomal = payroll_nomal + oneday_payroll_nomal;
         payroll_midnight_nomal =
           payroll_midnight_nomal + oneday_payroll_midnight_nomal;
@@ -2316,6 +2327,7 @@ export const calculateTotalResultData =
         request_data: line_request_data, //申請内容
 
         //給与計算用項目(分)
+        normal_work_limit: obj["normal_work_limit"], //法定内労働の上限
         payroll_type_breakdown: oneday_payroll_type_breakdown, //グラフ表示用時刻内わけ
         payroll_nomal: oneday_payroll_nomal, //日中_通常(A)
         payroll_midnight_nomal: oneday_payroll_midnight_nomal, //深夜_通常(B)
@@ -3050,6 +3062,9 @@ export const calculateTotalResultData =
         res["user_data"]["group_shift_result_review"]
       ), //勤務実績確認状況表示
       holiday_unit_type: res["holiday_unit_type"], //休暇単位 0:分数単位 1:日数単位
+      working_type: res["shift_template_data"]["working_type"], //労働志度 0:通常労働制 1:変形労働制
+      normal_work_month_limit: NumbermonthNormalWorklimit, //月合計の法定内の労働時間の上限
+      normal_work_week_limit: arrayWeekNormalWorklimit, //週毎の法定内の労働時間の上限
 
       //給与計算用集計(分)
       payroll_nomal: payroll_nomal, //A: 日中_通常
