@@ -1,6 +1,5 @@
-import { OUT_WORK_AGG, Deep_Night_AGG, CUSTOM_AGG } from "./internal/index";
-import * as $ from "jquery";
 import moment from "moment";
+import { CUSTOM_AGG, Deep_Night_AGG, OUT_WORK_AGG } from "./internal/index";
 
 /**
  * @file 勤務記録表生成スクリプト
@@ -138,7 +137,7 @@ export const calculateTotalResultData =
 
     //企業ごとカスタム集計枠(時給時間帯)生成
     if (res["work_agg_template"] != null) {
-      $.each(res["work_agg_template"]["data"]["daily"], function (i, obj) {
+      res["work_agg_template"]["data"]["daily"].forEach(function (obj) {
         custom_payroll.push({
           option: obj,
           agg_result: 0,
@@ -151,7 +150,7 @@ export const calculateTotalResultData =
 
     //特殊日数集計枠生成
     var pro_exday_number_array = [];
-    $.each(res["exday_list"], function (exday_list_i, exday_list_obj) {
+    res["exday_list"].forEach(function (exday_list_obj) {
       if (exday_list_obj["data"]["hidden"] == "0") {
         pro_exday_number_array.push({
           id: exday_list_obj["id"],
@@ -162,7 +161,7 @@ export const calculateTotalResultData =
     });
     //console.log("特殊日集計配列",pro_exday_number_array);
 
-    $.each(res["work_record"], function (i, obj) {
+    res["work_record"].forEach(function (obj) {
       //console.log(["date",obj.date,body_start.isAfter(obj.date),(i < 7)]);
       obj.pre_calc = body_start.isAfter(obj.date); // 事前計算用の日付か？
     });
@@ -178,7 +177,7 @@ export const calculateTotalResultData =
       csv_body_str +=
         ",法定内残業,法定外残業,深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退";
 
-      $.each(custom_payroll, function (c_p_i, c_p_obj) {
+      custom_payroll.forEach(function (c_p_obj) {
         //時給時間帯項目追加
         csv_body_str += "," + c_p_obj["option"]["name"];
       });
@@ -195,32 +194,30 @@ export const calculateTotalResultData =
 
     /**********************************************************/
 
-    $.each(res["work_record"], function (i, obj) {
+    res["work_record"].forEach(function (obj) {
       //特殊日
       var line_exday_state = "";
       if (!obj.pre_calc) {
         //前月の週のデータは集計しない
         if (obj["data"]["exday"] != null && obj["data"]["exday"] != "") {
           //一日毎の表記では非表示設定の特殊日も表記するが、一カ月の集計では表示設定の特殊日のみ行う
-          $.each(res["exday_list"], function (exday_list_i, exday_list_obj) {
-            $.each(
-              obj["data"]["exday"].split(","),
-              function (tg_exday_i, tg_exday_obj) {
-                if (exday_list_obj["id"] == tg_exday_obj) {
-                  line_exday_state += "[" + exday_list_obj["name"] + "]"; //一日毎の表記
-                }
+          res["exday_list"].forEach(function (exday_list_obj) {
+            obj["data"]["exday"].split(",").forEach(function (tg_exday_obj) {
+              if (exday_list_obj["id"] == tg_exday_obj) {
+                line_exday_state += "[" + exday_list_obj["name"] + "]"; //一日毎の表記
               }
-            );
+            });
           });
 
-          for(let none_hidden_exday_obj  of pro_exday_number_array){ //一カ月分集計
-            for(let tg_exday_obj  of obj["data"]["exday"].split(",")){
-              if ( none_hidden_exday_obj["id"] == tg_exday_obj ) {
-                none_hidden_exday_obj["number"] = none_hidden_exday_obj["number"] + 1;
+          for (let none_hidden_exday_obj of pro_exday_number_array) {
+            //一カ月分集計
+            for (let tg_exday_obj of obj["data"]["exday"].split(",")) {
+              if (none_hidden_exday_obj["id"] == tg_exday_obj) {
+                none_hidden_exday_obj["number"] =
+                  none_hidden_exday_obj["number"] + 1;
               }
             }
           }
-
         }
       }
 
@@ -229,7 +226,7 @@ export const calculateTotalResultData =
       let line_request_data = {};
       line_request_data["date"] = obj["date"];
       if (res["reqests"] != null) {
-        $.each(res["reqests"]["data"], function (old_r_i, old_r_obj) {
+        res["reqests"]["data"].forEach(function (old_r_obj, old_r_i) {
           if (obj["result_start"] != "" && obj["result_end"] != "") {
             //打刻取り消しなどによって出勤打刻、退勤打刻のデータがない場合は、申請内容と異なる状態となっているため申請のアイコンを出さない
             if (
@@ -608,19 +605,15 @@ export const calculateTotalResultData =
           /////////////
           //退勤時間を丸めたことで勤務外になってしまった休憩は削除
           var a_r_break_time = [];
-          $.each(
-            obj["data"]["result_breaktime"],
-            function (r_breaktime_i, r_breaktime_obj) {
-              if (
-                moment(obj["result_start"]) <
-                  moment(r_breaktime_obj["start"]) &&
-                moment(r_breaktime_obj["end"]) < moment(obj["result_end"])
-              ) {
-                //console.log("勤務内:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]);
-                a_r_break_time.push(r_breaktime_obj);
-              } //else { console.log("勤務外:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]); }
-            }
-          );
+          obj["data"]["result_breaktime"].forEach(function (r_breaktime_obj) {
+            if (
+              moment(obj["result_start"]) < moment(r_breaktime_obj["start"]) &&
+              moment(r_breaktime_obj["end"]) < moment(obj["result_end"])
+            ) {
+              //console.log("勤務内:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]);
+              a_r_break_time.push(r_breaktime_obj);
+            } //else { console.log("勤務外:" + r_breaktime_obj["start"] + "～" + r_breaktime_obj["end"]); }
+          });
           obj["data"]["result_breaktime"] = a_r_break_time;
 
           for (let r_breaktime_obj of obj["data"]["result_breaktime"]) {
@@ -653,7 +646,7 @@ export const calculateTotalResultData =
       var state_error_flag = 0; //欠勤だった場合は1に
       var in_date_search = function (days, tday) {
         let iday = "";
-        $.each(days, function (index, value) {
+        days.forEach(function (value) {
           if (value["out_date"] == tday) {
             let im = value["in_date"].split("-")[1];
             let id = value["in_date"].split("-")[2];
@@ -891,16 +884,13 @@ export const calculateTotalResultData =
       let custom_onday_payroll = []; //企業ごとカスタム集計
       //企業ごとカスタム集計枠設定
       if (res["work_agg_template"] != null) {
-        $.each(
-          res["work_agg_template"]["data"]["daily"],
-          function (w_a_d_i, w_a_d_obj) {
-            custom_onday_payroll.push({
-              option: w_a_d_obj,
-              agg_result: 0,
-              agg_result_array: [],
-            });
-          }
-        );
+        res["work_agg_template"]["data"]["daily"].forEach(function (w_a_d_obj) {
+          custom_onday_payroll.push({
+            option: w_a_d_obj,
+            agg_result: 0,
+            agg_result_array: [],
+          });
+        });
       }
       //console.log("日毎カスタム集計枠",custom_onday_payroll);
 
@@ -917,26 +907,23 @@ export const calculateTotalResultData =
             { start: obj["result_start"], end: "", total_time: "" },
           ];
         }
-        $.each(
-          obj["data"]["result_breaktime"],
-          function (r_breaktime_i, r_breaktime_obj) {
-            work_time_breakdown[work_time_breakdown.length - 1]["end"] =
-              r_breaktime_obj["start"];
-            work_time_breakdown[work_time_breakdown.length - 1]["total_time"] =
-              Math.floor(
-                (moment(r_breaktime_obj["start"]) -
-                  moment(
-                    work_time_breakdown[work_time_breakdown.length - 1]["start"]
-                  )) /
-                  60000
-              );
-            work_time_breakdown.push({
-              start: r_breaktime_obj["end"],
-              end: "",
-              total_time: "",
-            });
-          }
-        );
+        obj["data"]["result_breaktime"].forEach(function (r_breaktime_obj) {
+          work_time_breakdown[work_time_breakdown.length - 1]["end"] =
+            r_breaktime_obj["start"];
+          work_time_breakdown[work_time_breakdown.length - 1]["total_time"] =
+            Math.floor(
+              (moment(r_breaktime_obj["start"]) -
+                moment(
+                  work_time_breakdown[work_time_breakdown.length - 1]["start"]
+                )) /
+                60000
+            );
+          work_time_breakdown.push({
+            start: r_breaktime_obj["end"],
+            end: "",
+            total_time: "",
+          });
+        });
         work_time_breakdown[work_time_breakdown.length - 1]["end"] =
           obj["result_end"];
         work_time_breakdown[work_time_breakdown.length - 1]["total_time"] =
@@ -951,7 +938,7 @@ export const calculateTotalResultData =
         //日跨ぎで分割する
         var a_w_t_b = work_time_breakdown;
         var work_time_breakdown = [];
-        $.each(a_w_t_b, function (r_breaktime_i, r_breaktime_obj) {
+        a_w_t_b.forEach(function (r_breaktime_obj) {
           if (
             r_breaktime_obj["start"].substr(0, 10) ==
             r_breaktime_obj["end"].substr(0, 10)
@@ -1036,10 +1023,10 @@ export const calculateTotalResultData =
         var stock_oneday_nomal = 0; //日毎の勤務時間上限ストック
         var nomal_work_time_breakdown = []; //通常勤務時間内わけ配列
 
-        $.each(work_time_breakdown, function (w_b_i, w_b_obj) {
+        work_time_breakdown.forEach(function (w_b_obj) {
           //勤務内わけぶんループ
           var h_type_flag = 0; //勤務内わけごとにそれが法定休日の労働かそう例外かの判定を行う
-          $.each(res["work_record"], function (j_f_t_i, j_f_t_obj) {
+          res["work_record"].forEach(function (j_f_t_obj) {
             if (j_f_t_obj["date"] == w_b_obj["start"].substr(0, 10)) {
               if (Number(j_f_t_obj["holiday_type"]) == 2) {
                 h_type_flag = 1;
@@ -1253,7 +1240,7 @@ export const calculateTotalResultData =
           }
 
           //カスタム集計処理
-          $.each(custom_onday_payroll, function (c_o_p_i, c_o_p_obj) {
+          custom_onday_payroll.forEach(function (_, c_o_p_i) {
             const a_r = custom_onday_payroll[c_o_p_i]["agg_result"];
             const c_agg = CUSTOM_AGG(
               obj["date"],
@@ -1739,7 +1726,7 @@ export const calculateTotalResultData =
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:四捨五入
                 //カスタム集計
-                $.each(custom_onday_payroll, function (c_o_p_i, c_o_p_obj) {
+                custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
                     Math.round(
                       custom_onday_payroll[c_o_p_i]["agg_result"] /
@@ -1837,7 +1824,7 @@ export const calculateTotalResultData =
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:切り上げ
                 //カスタム集計
-                $.each(custom_onday_payroll, function (c_o_p_i, c_o_p_obj) {
+                custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
                     Math.ceil(
                       custom_onday_payroll[c_o_p_i]["agg_result"] /
@@ -1937,7 +1924,7 @@ export const calculateTotalResultData =
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:切り捨て
                 //カスタム集計
-                $.each(custom_onday_payroll, function (c_o_p_i, c_o_p_obj) {
+                custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
                     Math.floor(
                       custom_onday_payroll[c_o_p_i]["agg_result"] /
@@ -2189,7 +2176,7 @@ export const calculateTotalResultData =
         ///////////////////////////
         //時給時間帯
         //console.log(line_date + "時給時間帯:",custom_onday_payroll);
-        $.each(custom_onday_payroll, function (c_p_i, c_p_obj) {
+        custom_onday_payroll.forEach(function (c_p_obj) {
           csv_body_str +=
             +Math.floor(Number(c_p_obj["agg_result"]) / 60) +
             ":" +
@@ -2370,7 +2357,7 @@ export const calculateTotalResultData =
         report_label_data: line_report_label_data,
       });
 
-      $.each(custom_payroll, function (c_p_i, c_p_obj) {
+      custom_payroll.forEach(function (_, c_p_i) {
         custom_payroll[c_p_i]["agg_result"] =
           custom_payroll[c_p_i]["agg_result"] +
           custom_onday_payroll[c_p_i]["agg_result"];
@@ -2507,7 +2494,7 @@ export const calculateTotalResultData =
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:四捨五入
               //カスタム集計
-              $.each(custom_payroll, function (c_o_p_i, c_o_p_obj) {
+              custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
                   Math.round(
                     custom_payroll[c_o_p_i]["agg_result"] /
@@ -2580,7 +2567,7 @@ export const calculateTotalResultData =
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:切り上げ
               //カスタム集計
-              $.each(custom_payroll, function (c_o_p_i, c_o_p_obj) {
+              custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
                   Math.ceil(
                     custom_payroll[c_o_p_i]["agg_result"] /
@@ -2654,7 +2641,7 @@ export const calculateTotalResultData =
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:切り捨て
               //カスタム集計
-              $.each(custom_payroll, function (c_o_p_i, c_o_p_obj) {
+              custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
                   Math.floor(
                     custom_payroll[c_o_p_i]["agg_result"] /
@@ -2696,7 +2683,7 @@ export const calculateTotalResultData =
     //遅刻早退
     pro_late_fast_time = pro_late_start_time + pro_fast_end_time;
 
-    $.each(custom_payroll, function (c_p_i, c_p_obj) {
+    custom_payroll.forEach(function (c_p_obj) {
       c_p_obj["salary"] =
         c_p_obj["option"]["hourly_pay"] * (c_p_obj["agg_result"] / 60);
       //console.log("丸め前",c_p_obj["salary"]);
@@ -2715,7 +2702,7 @@ export const calculateTotalResultData =
     });
 
     //console.log("カスタム集計＿最終結果",custom_payroll);
-    $.each(custom_payroll, function (c_p_i, c_p_obj) {
+    custom_payroll.forEach(function (c_p_obj) {
       //console.log("最終結果内わけ",c_p_obj["option"]["name"],c_p_obj["option"]["start"],c_p_obj["option"]["end"],c_p_obj["agg_result"],c_p_obj["agg_result_array"]);
     });
 
@@ -2743,8 +2730,6 @@ export const calculateTotalResultData =
     //console.log("ソート後月合計日報ラベル",report_label_data);
 
     ///////////////////////////////////
-
-
 
     ///////////////////////////////////////////////////////////////
     //6_4調整
@@ -2813,7 +2798,6 @@ export const calculateTotalResultData =
 
     //CSV出力
     if (output_type == "CSV") {
-
       var csv_header_str = "勤務記録表\n";
 
       csv_header_str += "集計月," + target_month + "\n";
@@ -2821,39 +2805,67 @@ export const calculateTotalResultData =
       csv_header_str += "部署名," + groupname + "\n";
       csv_header_str += "氏名," + res["user_name"] + "\n";
       csv_header_str += "会員ID," + res["login_id"] + "\n\n";
-  
+
       ////
       csv_header_str += "時間丸め方法," + rounding_option_str + "\n"; //6_18追加
       csv_header_str += "シフトなし打刻," + required_shift_option_str + "\n"; //6_20追加
       csv_header_str += "\n\n";
       ////
-  
+
       csv_header_str += "給与計算用(分)\n";
       csv_header_str +=
-        "日中_通常(A)," + (Math.floor(payroll_nomal / 60) + ":" + ("0" + (payroll_nomal % 60)).slice(-2)) + "\n";
+        "日中_通常(A)," +
+        (Math.floor(payroll_nomal / 60) +
+          ":" +
+          ("0" + (payroll_nomal % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "深夜_通常(B)," + (Math.floor(payroll_midnight_nomal / 60) + ":" + ("0" + (payroll_midnight_nomal % 60)).slice(-2)) + "\n";
+        "深夜_通常(B)," +
+        (Math.floor(payroll_midnight_nomal / 60) +
+          ":" +
+          ("0" + (payroll_midnight_nomal % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-       "日中_残業(C)," + (Math.floor(payroll_over / 60) + ":" + ("0" + (payroll_over % 60)).slice(-2)) + "\n";
+        "日中_残業(C)," +
+        (Math.floor(payroll_over / 60) +
+          ":" +
+          ("0" + (payroll_over % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "深夜_残業(D)," + (Math.floor(payroll_midnight_over / 60) + ":" + ("0" + (payroll_midnight_over % 60)).slice(-2)) + "\n";
+        "深夜_残業(D)," +
+        (Math.floor(payroll_midnight_over / 60) +
+          ":" +
+          ("0" + (payroll_midnight_over % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "日中_休日(E)," + (Math.floor(payroll_holiday / 60) + ":" + ("0" + (payroll_holiday % 60)).slice(-2)) + "\n";
+        "日中_休日(E)," +
+        (Math.floor(payroll_holiday / 60) +
+          ":" +
+          ("0" + (payroll_holiday % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "深夜_休日(F)," + (Math.floor(payroll_midnight_holiday / 60) + ":" + ("0" + (payroll_midnight_holiday % 60)).slice(-2)) + "\n";
+        "深夜_休日(F)," +
+        (Math.floor(payroll_midnight_holiday / 60) +
+          ":" +
+          ("0" + (payroll_midnight_holiday % 60)).slice(-2)) +
+        "\n";
       csv_header_str += "\n";
-  
+
       csv_header_str += "時給計算帯(分)\n";
-      $.each(custom_payroll, function (c_p_i, c_p_obj) {
+      custom_payroll.forEach(function (c_p_obj) {
         csv_header_str +=
-          c_p_obj["option"]["name"] + "," + (Math.floor(c_p_obj["agg_result"] / 60) + ":" + ("0" + (c_p_obj["agg_result"] % 60)).slice(-2));
+          c_p_obj["option"]["name"] +
+          "," +
+          (Math.floor(c_p_obj["agg_result"] / 60) +
+            ":" +
+            ("0" + (c_p_obj["agg_result"] % 60)).slice(-2));
         if (res["user_data"]["work_agg_salary_show"] == 1) {
           csv_header_str += ",(" + c_p_obj["salary"] + "円)";
         }
         csv_header_str += "\n";
       });
       csv_header_str += "\n";
-  
+
       csv_header_str += "勤務日数\n";
       csv_header_str += "出勤," + pro_work_day_number + "\n";
       csv_header_str += "全日欠勤," + pro_absence_number + "\n";
@@ -2866,77 +2878,241 @@ export const calculateTotalResultData =
       csv_header_str += "所定休日," + pro_normal_holiday_number + "\n";
       csv_header_str += "法定休日," + pro_legal_holiday_number + "\n";
       csv_header_str += "\n";
-  
+
       csv_header_str += "勤務時間(分)\n";
       csv_header_str +=
-        "勤務," + (Math.floor(pro_work_time / 60) + ":" + ("0" + (pro_work_time % 60)).slice(-2)) + "\n";
+        "勤務," +
+        (Math.floor(pro_work_time / 60) +
+          ":" +
+          ("0" + (pro_work_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "休憩合計," + (Math.floor(pro_break_time / 60) + ":" + ("0" + (pro_break_time % 60)).slice(-2)) + "\n";
+        "休憩合計," +
+        (Math.floor(pro_break_time / 60) +
+          ":" +
+          ("0" + (pro_break_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "シフト合計," + (Math.floor(pro_shift_time / 60) + ":" + ("0" + (pro_shift_time % 60)).slice(-2)) + "\n";
+        "シフト合計," +
+        (Math.floor(pro_shift_time / 60) +
+          ":" +
+          ("0" + (pro_shift_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "所定労働時間," + (Math.floor(pro_scheduled_work_time / 60) + ":" + ("0" + (pro_scheduled_work_time % 60)).slice(-2)) + "\n";
+        "所定労働時間," +
+        (Math.floor(pro_scheduled_work_time / 60) +
+          ":" +
+          ("0" + (pro_scheduled_work_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "残業時間," + (Math.floor(pro_shift_over_work_time / 60) + ":" + ("0" + (pro_shift_over_work_time % 60)).slice(-2)) + "\n";
+        "残業時間," +
+        (Math.floor(pro_shift_over_work_time / 60) +
+          ":" +
+          ("0" + (pro_shift_over_work_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "シフト外残業," + (Math.floor(works.over / 60) + ":" + ("0" + (works.over % 60)).slice(-2)) + "\n";
+        "シフト外残業," +
+        (Math.floor(works.over / 60) +
+          ":" +
+          ("0" + (works.over % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "法定外残業," + (Math.floor(legal_works.over / 60) + ":" + ("0" + (legal_works.over % 60)).slice(-2)) + "\n";
+        "法定外残業," +
+        (Math.floor(legal_works.over / 60) +
+          ":" +
+          ("0" + (legal_works.over % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "深夜労働," + (Math.floor(pro_late_night_work_time / 60) + ":" + ("0" + (pro_late_night_work_time % 60)).slice(-2)) + "\n";
+        "深夜労働," +
+        (Math.floor(pro_late_night_work_time / 60) +
+          ":" +
+          ("0" + (pro_late_night_work_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "休日労働," + (Math.floor(pro_holiday_work_time / 60) + ":" + ("0" + (pro_holiday_work_time % 60)).slice(-2)) + "\n";
+        "休日労働," +
+        (Math.floor(pro_holiday_work_time / 60) +
+          ":" +
+          ("0" + (pro_holiday_work_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "所定休日労働," + (Math.floor(pro_normal_holiday_work_time / 60) + ":" + ("0" + (pro_normal_holiday_work_time % 60)).slice(-2)) + "\n";
+        "所定休日労働," +
+        (Math.floor(pro_normal_holiday_work_time / 60) +
+          ":" +
+          ("0" + (pro_normal_holiday_work_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "全日欠勤," + (Math.floor(pro_absence_time / 60) + ":" + ("0" + (pro_absence_time % 60)).slice(-2)) + "\n";
+        "全日欠勤," +
+        (Math.floor(pro_absence_time / 60) +
+          ":" +
+          ("0" + (pro_absence_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "欠勤," + (Math.floor(pro_absence_not_all_day_time / 60) + ":" + ("0" + (pro_absence_not_all_day_time % 60)).slice(-2)) + "\n";
+        "欠勤," +
+        (Math.floor(pro_absence_not_all_day_time / 60) +
+          ":" +
+          ("0" + (pro_absence_not_all_day_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "遅刻," + (Math.floor(pro_late_start_time / 60) + ":" + ("0" + (pro_late_start_time % 60)).slice(-2)) + "\n";
+        "遅刻," +
+        (Math.floor(pro_late_start_time / 60) +
+          ":" +
+          ("0" + (pro_late_start_time % 60)).slice(-2)) +
+        "\n";
       csv_header_str +=
-        "早退," + (Math.floor(pro_fast_end_time / 60) + ":" + ("0" + (pro_fast_end_time % 60)).slice(-2)) + "\n\n";
-  
+        "早退," +
+        (Math.floor(pro_fast_end_time / 60) +
+          ":" +
+          ("0" + (pro_fast_end_time % 60)).slice(-2)) +
+        "\n\n";
+
       if (res["holiday_unit_type"] == 0) {
         //分数単位
         /////////////////////////////
         csv_header_str += "休暇消化時間(集計月)(日)\n";
         csv_header_str +=
-          "有休消化," + Math.floor( (Number(yuuQ_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "有休消化," +
+          Math.floor(
+            (Number(yuuQ_time) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str +=
-          "振休消化," + Math.floor( (Number(furiQ_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "振休消化," +
+          Math.floor(
+            (Number(furiQ_time) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str +=
-          "代休消化," + Math.floor( (Number(daiQ_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "代休消化," +
+          Math.floor(
+            (Number(daiQ_time) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇付与時間(集計月)(日)\n";
         csv_header_str +=
-          "有休付与," + Math.floor( (Number(yuuQ_in_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "有休付与," +
+          Math.floor(
+            (Number(yuuQ_in_time) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str +=
-          "振休付与," + Math.floor( (Number(furiQ_in_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "振休付与," +
+          Math.floor(
+            (Number(furiQ_in_time) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str +=
-          "代休付与," + Math.floor( (Number(daiQ_in_time) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "代休付与," +
+          Math.floor(
+            (Number(daiQ_in_time) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇残時間(集計時点)(日)\n";
         csv_header_str +=
-          "有休残数," + Math.floor( (Number(res["Q_log"]["tg_month_yuuQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "有休残数," +
+          Math.floor(
+            (Number(res["Q_log"]["tg_month_yuuQ_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str +=
-          "振休残数," + Math.floor( (Number(res["Q_log"]["tg_month_furiQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "振休残数," +
+          Math.floor(
+            (Number(res["Q_log"]["tg_month_furiQ_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str +=
-          "代休残数," + Math.floor( (Number(res["Q_log"]["tg_month_daiQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + "\n";
+          "代休残数," +
+          Math.floor(
+            (Number(res["Q_log"]["tg_month_daiQ_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇残時間(出力日時点)(日)\n";
         csv_header_str +=
-          "有休残数," + Math.floor( (Number(res["Q_log"]["yuuQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + 
-          ",(消化予定:" + (Math.floor( (Number(res["Q_log"]["yuuQ_plan_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10) * -1 + ")" + "\n";
+          "有休残数," +
+          Math.floor(
+            (Number(res["Q_log"]["yuuQ_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          ",(消化予定:" +
+          (Math.floor(
+            (Number(res["Q_log"]["yuuQ_plan_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10) *
+            -1 +
+          ")" +
+          "\n";
         csv_header_str +=
-          "振休残数," + Math.floor( (Number(res["Q_log"]["huriQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 + 
-          ",(消化予定:" + (Math.floor( (Number(res["Q_log"]["huriQ_plan_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10) * -1 + ")" + "\n";
+          "振休残数," +
+          Math.floor(
+            (Number(res["Q_log"]["huriQ_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          ",(消化予定:" +
+          (Math.floor(
+            (Number(res["Q_log"]["huriQ_plan_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10) *
+            -1 +
+          ")" +
+          "\n";
         csv_header_str +=
-          "代休残数," + Math.floor( (Number(res["Q_log"]["daiQ_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10 +
-          ",(消化予定:" + (Math.floor( (Number(res["Q_log"]["daiQ_plan_number"]) / Number(res["user_data"]["workminutes_per_day"])) * 10 ) / 10) * -1 + ")" + "\n\n";
+          "代休残数," +
+          Math.floor(
+            (Number(res["Q_log"]["daiQ_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10 +
+          ",(消化予定:" +
+          (Math.floor(
+            (Number(res["Q_log"]["daiQ_plan_number"]) /
+              Number(res["user_data"]["workminutes_per_day"])) *
+              10
+          ) /
+            10) *
+            -1 +
+          ")" +
+          "\n\n";
       } else if (res["holiday_unit_type"] == 1) {
         //日数単位
         /////////////////////////////
@@ -2962,30 +3138,44 @@ export const calculateTotalResultData =
         csv_header_str +=
           "有休残数," + Number(res["Q_log"]["tg_month_yuuQ_number"]) / 2 + "\n";
         csv_header_str +=
-          "振休残数," + Number(res["Q_log"]["tg_month_furiQ_number"]) / 2 + "\n";
+          "振休残数," +
+          Number(res["Q_log"]["tg_month_furiQ_number"]) / 2 +
+          "\n";
         csv_header_str +=
           "代休残数," + Number(res["Q_log"]["tg_month_daiQ_number"]) / 2 + "\n";
         csv_header_str += "\n";
         /////////////////////////////
         csv_header_str += "休暇残時間(出力日時点)(日)\n";
         csv_header_str +=
-          "有休残数," + Number(res["Q_log"]["yuuQ_number"]) / 2 +
-          ",(消化予定:" + (Number(res["Q_log"]["yuuQ_plan_number"]) / 2) * -1 + ")" + "\n";
+          "有休残数," +
+          Number(res["Q_log"]["yuuQ_number"]) / 2 +
+          ",(消化予定:" +
+          (Number(res["Q_log"]["yuuQ_plan_number"]) / 2) * -1 +
+          ")" +
+          "\n";
         csv_header_str +=
-          "振休残数," + Number(res["Q_log"]["huriQ_number"]) / 2 +
-          ",(消化予定:" + (Number(res["Q_log"]["huriQ_plan_number"]) / 2) * -1 + ")" + "\n";
+          "振休残数," +
+          Number(res["Q_log"]["huriQ_number"]) / 2 +
+          ",(消化予定:" +
+          (Number(res["Q_log"]["huriQ_plan_number"]) / 2) * -1 +
+          ")" +
+          "\n";
         csv_header_str +=
-          "代休残数," + Number(res["Q_log"]["daiQ_number"]) / 2 +
-          ",(消化予定:" + (Number(res["Q_log"]["daiQ_plan_number"]) / 2) * -1 + ")" + "\n\n";
+          "代休残数," +
+          Number(res["Q_log"]["daiQ_number"]) / 2 +
+          ",(消化予定:" +
+          (Number(res["Q_log"]["daiQ_plan_number"]) / 2) * -1 +
+          ")" +
+          "\n\n";
       }
       /////////////////////////////
       csv_header_str += "特殊日集計\n";
-      $.each(pro_exday_number_array, function (exday_list_i, exday_list_obj) {
+      pro_exday_number_array.forEach(function (exday_list_obj) {
         csv_header_str +=
           exday_list_obj["name"] + ":" + exday_list_obj["number"] + "日 ";
       });
       csv_header_str += "\n\n";
-  
+
       //console.log("特殊日集計",pro_exday_number_array);
 
       /////////////////////////////
@@ -2994,8 +3184,11 @@ export const calculateTotalResultData =
 
       for (let report_breakdown of report_label_data) {
         csv_report_label_breakdown_str +=
-          report_breakdown["label_name"] + "," +
-          Math.floor(Number(report_breakdown["total_time"]) / 60) + ":" + ("0" + (Number(report_breakdown["total_time"]) % 60)).slice(-2) +
+          report_breakdown["label_name"] +
+          "," +
+          Math.floor(Number(report_breakdown["total_time"]) / 60) +
+          ":" +
+          ("0" + (Number(report_breakdown["total_time"]) % 60)).slice(-2) +
           "\n";
       }
       csv_report_label_breakdown_str += "\n";
@@ -3009,12 +3202,19 @@ export const calculateTotalResultData =
       for (let onday_obj of oneday_breakdown_list) {
         const days = ["(日)", "(月)", "(火)", "(水)", "(木)", "(金)", "(土)"];
         csv_report_label_breakdown_str +=
-          ("0" + onday_obj["date"].split("-")[1]).slice(-2) + "月" + ("0" + onday_obj["date"].split("-")[2]).slice(-2) + "日" + days[new Date(onday_obj["date"]).getDay()];
+          ("0" + onday_obj["date"].split("-")[1]).slice(-2) +
+          "月" +
+          ("0" + onday_obj["date"].split("-")[2]).slice(-2) +
+          "日" +
+          days[new Date(onday_obj["date"]).getDay()];
         csv_report_label_breakdown_str += ",";
         for (let report_breakdown of report_label_data) {
           let f = 1;
           for (let oneday_report_label_obj of onday_obj["report_label_data"]) {
-            if ( report_breakdown["label_id"] == oneday_report_label_obj["label_id"] ) {
+            if (
+              report_breakdown["label_id"] ==
+              oneday_report_label_obj["label_id"]
+            ) {
               f = 0;
               csv_report_label_breakdown_str +=
                 oneday_report_label_obj["total_time"] + ",";
@@ -3029,10 +3229,14 @@ export const calculateTotalResultData =
 
       /////////////////////////////
 
-      let csv_str = csv_header_str + csv_body_str + csv_report_label_breakdown_str;
+      let csv_str =
+        csv_header_str + csv_body_str + csv_report_label_breakdown_str;
       //console.log("CSV確認",csv_str);
 
-      Export("勤務実績_" + res["user_name"] + "_" + target_month + ".csv",csv_str);
+      Export(
+        "勤務実績_" + res["user_name"] + "_" + target_month + ".csv",
+        csv_str
+      );
     }
 
     let res_data = {
