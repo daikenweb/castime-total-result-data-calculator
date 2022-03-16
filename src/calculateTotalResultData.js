@@ -24,7 +24,7 @@ import { CUSTOM_AGG, Deep_Night_AGG, OUT_WORK_AGG } from "./internal/index";
 export const calculateTotalResultData =
   ({ output_type, start_date, end_date }) =>
   (res) => {
-    console.log("取得確認", res);
+    //console.log("取得確認", res);
     const body_start = moment(start_date);
 
     //console.log("集計開始月",start_date);
@@ -3374,7 +3374,7 @@ export const calculateTotalResultData =
       oneday_breakdown_list: oneday_breakdown_list, ////一日ごと内わけ用配列
     };
 
-    console.log("集計データ", res_data);
+    //console.log("集計データ", res_data);
     //console.log("日ごとデータ確認",oneday_breakdown_list);
     return res_data;
   };
