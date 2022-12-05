@@ -83,6 +83,8 @@ export const calculateTotalResultData =
 
     let pro_normal_holiday_work_time = 0; //所定休日労働
 
+    let pro_actual_work_time = 0; //打刻時間
+
     /////////////////
     //分数単位
     //休暇消化時間(集計月)
@@ -175,7 +177,7 @@ export const calculateTotalResultData =
       csv_body_str +=
         ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_休日(E),深夜_休日(F)";
       csv_body_str +=
-        ",法定内残業,法定外残業,深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退";
+        ",法定内残業,法定外残業,深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
 
       custom_payroll.forEach(function (c_p_obj) {
         //時給時間帯項目追加
@@ -464,6 +466,23 @@ export const calculateTotalResultData =
         line_result = "-";
       } else {
         line_result = obj["result_start"].substr(11, 5) + "～" + true_end_time;
+      }
+
+
+
+      ///////////////////////////////////
+      //打刻時間の集計
+      let line_actual_work_time = 0;
+      if (obj["result_start"] != "" && obj["result_end"] != "") {
+        let result_break_total_time = 0;
+        for (let r_breaktime_obj of obj["data"]["result_breaktime"]) {
+            result_break_total_time = result_break_total_time + Number(r_breaktime_obj["total_time"]);
+        }
+  
+        line_actual_work_time =
+            Math.floor(
+              (moment(obj["result_end"]) - moment(obj["result_start"])) / 60 / 1000
+            ) - Number(result_break_total_time);
       }
 
       ///////////////////////////////////
@@ -1679,6 +1698,10 @@ export const calculateTotalResultData =
                   Math.round(
                     line_legal_inner_over_time / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //法定内残業時間:四捨五入
+                  line_actual_work_time =
+                  Math.round(
+                    line_actual_work_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //打刻時間:四捨五入
                 //給与計算用集計
                 payroll_nomal =
                   Math.round(payroll_nomal / Number(rounding_option[0])) *
@@ -1778,6 +1801,10 @@ export const calculateTotalResultData =
                   Math.ceil(
                     line_legal_inner_over_time / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //法定内残業時間:切り上げ
+                line_actual_work_time =
+                  Math.ceil(
+                    line_actual_work_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //打刻時間:切り上げ
                 //給与計算用集計
                 payroll_nomal =
                   Math.ceil(payroll_nomal / Number(rounding_option[0])) *
@@ -1877,6 +1904,10 @@ export const calculateTotalResultData =
                   Math.floor(
                     line_legal_inner_over_time / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //法定内残業時間:切り捨て
+                line_actual_work_time =
+                  Math.floor(
+                    line_actual_work_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //打刻時間:切り捨て
                 //給与計算用集計
                 payroll_nomal =
                   Math.floor(payroll_nomal / Number(rounding_option[0])) *
@@ -1967,6 +1998,8 @@ export const calculateTotalResultData =
       pro_before_over_work_time += line_before_over_work_time; //前残業
       //console.log(obj["date"] + " 合計前残業",pro_before_over_work_time);
       pro_normal_holiday_work_time += line_normal_holiday_work_time; //所定休日労働
+
+      pro_actual_work_time += line_actual_work_time; //打刻時間
 
       //分数単位
       //休暇消化時間(集計月)
@@ -2173,6 +2206,11 @@ export const calculateTotalResultData =
           ":" +
           ("0" + (Number(line_fast_end_time) % 60)).slice(-2) +
           ","; //早退
+        csv_body_str +=
+          Math.floor(Number(line_actual_work_time) / 60) +
+          ":" +
+          ("0" + (Number(line_actual_work_time) % 60)).slice(-2) +
+          ","; //打刻時間
         ///////////////////////////
         //時給時間帯
         //console.log(line_date + "時給時間帯:",custom_onday_payroll);
@@ -2308,6 +2346,7 @@ export const calculateTotalResultData =
         late_fast_time: line_late_fast_time, //遅刻早退
         before_over_work_time: line_before_over_work_time, //前残業
         normal_holiday_work_time: line_normal_holiday_work_time, //所定休日労働
+        actual_work_time: line_actual_work_time, //打刻時間
 
         exday_state: line_exday_state, //特殊日設定
 
@@ -2472,6 +2511,10 @@ export const calculateTotalResultData =
                 Math.round(
                   pro_legal_inner_works_over / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //法定内残業:四捨五入
+              pro_actual_work_time =
+                Math.round(
+                  pro_actual_work_time / Number(rounding_option[0])
+                ) * Number(rounding_option[0]); //打刻時間:四捨五入
               //給与計算用集計
               payroll_nomal =
                 Math.round(payroll_nomal / Number(rounding_option[0])) *
@@ -2546,6 +2589,10 @@ export const calculateTotalResultData =
                 Math.ceil(
                   pro_legal_inner_works_over / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //法定内残業:切り上げ
+              pro_actual_work_time =
+                Math.ceil(
+                  pro_actual_work_time / Number(rounding_option[0])
+                ) * Number(rounding_option[0]); //打刻時間:切り上げ
               //給与計算用集計
               payroll_nomal =
                 Math.ceil(payroll_nomal / Number(rounding_option[0])) *
@@ -2619,6 +2666,10 @@ export const calculateTotalResultData =
                 Math.floor(
                   pro_legal_inner_works_over / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //法定内残業:切り捨て
+              pro_actual_work_time =
+                Math.floor(
+                  pro_actual_work_time / Number(rounding_option[0])
+                ) * Number(rounding_option[0]); //打刻時間:切り捨て
               //給与計算用集計
               payroll_nomal =
                 Math.floor(payroll_nomal / Number(rounding_option[0])) *
@@ -2963,6 +3014,12 @@ export const calculateTotalResultData =
         (Math.floor(pro_fast_end_time / 60) +
           ":" +
           ("0" + (pro_fast_end_time % 60)).slice(-2)) +
+        "\n";
+        csv_header_str +=
+        "打刻時間," +
+        (Math.floor(pro_actual_work_time / 60) +
+          ":" +
+          ("0" + (pro_actual_work_time % 60)).slice(-2)) +
         "\n\n";
 
       if (res["holiday_unit_type"] == 0) {
@@ -3313,6 +3370,7 @@ export const calculateTotalResultData =
       pro_before_over_work_time: pro_before_over_work_time, //前残業
       pro_legal_inner_works_over: pro_legal_inner_works_over, //法定内残業
       pro_normal_holiday_work_time: pro_normal_holiday_work_time, //所定休日労働
+      pro_actual_work_time: pro_actual_work_time, //打刻時間
 
       ///////////////////////////////
       //分数単位
@@ -3374,7 +3432,7 @@ export const calculateTotalResultData =
       oneday_breakdown_list: oneday_breakdown_list, ////一日ごと内わけ用配列
     };
 
-    //console.log("集計データ", res_data);
+    console.log("集計データ", res_data);
     //console.log("日ごとデータ確認",oneday_breakdown_list);
     return res_data;
   };
