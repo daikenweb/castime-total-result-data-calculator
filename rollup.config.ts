@@ -1,8 +1,8 @@
-import pluginTypescript from "@rollup/plugin-typescript";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import { terser } from "rollup-plugin-terser";
-import * as pkg from "./package.json";
+import pluginTypescript from '@rollup/plugin-typescript';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import terser from '@rollup/plugin-terser';
+import pkg from './package.json' assert { type: 'json' };
 
 const banner = `/*!
  * ${pkg.name} v${pkg.version}
@@ -13,33 +13,33 @@ const banner = `/*!
 
 export default [
   {
-    input: "src/index.ts",
+    input: 'src/index.ts',
     output: {
-      name: "index.js",
+      name: 'index.js',
       file: pkg.module,
-      format: "es",
-      sourcemap: "inline",
+      format: 'es',
+      sourcemap: 'inline',
       banner,
     },
     plugins: [
       pluginTypescript({
-        tsconfig: "./tsconfig.json",
+        tsconfig: './tsconfig.json',
       }),
     ],
-    external: [...Object.keys(pkg.dependencies), "date-fns/fp"],
+    external: [...Object.keys(pkg.dependencies), 'date-fns/fp'],
   },
   {
-    input: "src/index.ts",
+    input: 'src/index.ts',
     output: {
-      name: "castime-total-result-data-calculator",
+      name: 'castime-total-result-data-calculator',
       file: pkg.browser,
-      format: "es",
-      sourcemap: "inline",
+      format: 'es',
+      sourcemap: 'inline',
       banner,
     },
     plugins: [
       pluginTypescript({
-        tsconfig: "./tsconfig.json",
+        tsconfig: './tsconfig.json',
       }),
       nodeResolve({
         browser: true,
@@ -49,17 +49,17 @@ export default [
     ],
   },
   {
-    input: "src/index.ts",
+    input: 'src/index.ts',
     output: {
-      name: "castime-total-result-data-calculator",
+      name: 'castime-total-result-data-calculator',
       file: pkg.main,
-      format: "cjs",
-      sourcemap: "inline",
+      format: 'cjs',
+      sourcemap: 'inline',
       banner,
     },
     plugins: [
       pluginTypescript({
-        tsconfig: "./tsconfig.json",
+        tsconfig: './tsconfig.json',
       }),
       nodeResolve({
         browser: true,
