@@ -649,6 +649,26 @@ export const calculateTotalResultData =
             ) - Number(a_r_total_break_time);
         }
       }
+      else {
+        if (res["user_data"]["required_request"] != null) {
+          if (res["user_data"]["required_request"]["holiday_work"] == 0) {
+            //シフトがない場合でも休日出勤申請必須でなければ休憩実績の記録を集計する
+            if (obj["result_start"] != "" && obj["result_end"] != "") {
+              //実績はある
+
+              for (let r_breaktime_obj of obj["data"]["result_breaktime"]) {
+                a_r_total_break_time += Number(r_breaktime_obj["total_time"]);
+              }
+              obj["work_time"] =
+              Math.floor(
+                (moment(obj["result_end"]) - moment(obj["result_start"])) / 60000
+              ) - Number(a_r_total_break_time);
+
+            }
+          }
+        }
+      }
+      
       ////////////////////////////////////////////
       //console.log("動作確認");
 
