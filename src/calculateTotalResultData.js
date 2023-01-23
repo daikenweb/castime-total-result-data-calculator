@@ -45,6 +45,8 @@ export const calculateTotalResultData =
     let payroll_midnight_over = 0; //D: 深夜_残業
     let payroll_holiday = 0; //E: 日中_休日
     let payroll_midnight_holiday = 0; //F: 深夜_休日
+    let payroll_over_60_hour = 0; //C': 日中_残業60時間以上
+    let payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
 
     let custom_payroll = []; //カスタム集計(時給時間帯)
     let custom_payroll_time = 0; //企業ごとカスタム集計_合計時間
@@ -918,6 +920,8 @@ export const calculateTotalResultData =
       var oneday_payroll_midnight_over = 0; //D: 深夜_残業
       var oneday_payroll_holiday = 0; //E: 日中_休日
       var oneday_payroll_midnight_holiday = 0; //F: 深夜_休日
+      let oneday_payroll_over_60_hour = 0; //C': 日中_残業60時間以上
+      let oneday_payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
       var oneday_payroll_type_breakdown = []; //グラフ表示のために給与タイプの時刻内わけ配列を作成
 
       let custom_onday_payroll = []; //企業ごとカスタム集計
@@ -1278,6 +1282,56 @@ export const calculateTotalResultData =
             }
           }
 
+          /////////////////////////
+          //A~F内わけ配列を時系列順に並び替え
+          // let a = oneday_payroll_type_breakdown;
+          //oneday_payroll_type_breakdown = [];
+          /////////////////////////
+          //60を越えている場合
+          console.log("残業累積確認",obj["date"],payroll_over, payroll_midnight_over, oneday_payroll_over, oneday_payroll_midnight_over);
+          if(3600 < payroll_over + payroll_midnight_over){
+            console.log("残業60越え(全て)",obj["date"],oneday_payroll_over_60_hour);
+            //oneday_payroll_over_60_hour = oneday_payroll_over + oneday_payroll_midnight_over; 
+            oneday_payroll_over_60_hour = oneday_payroll_over;
+            oneday_payroll_midnight_over_60_hour = oneday_payroll_midnight_over;
+          } else if(3600 < payroll_over + payroll_midnight_over + oneday_payroll_over + oneday_payroll_midnight_over){
+            console.log("残業60越え(一部)",obj["date"],oneday_payroll_over_60_hour);
+            //oneday_payroll_over_60_hour = payroll_over + payroll_midnight_over + oneday_payroll_over + oneday_payroll_midnight_over - 3600;
+            
+            let overStack60 = payroll_over + payroll_midnight_over;
+
+            //console.log("配列確認",oneday_payroll_type_breakdown);
+            for(let payrollTypeObj of oneday_payroll_type_breakdown){
+              console.log("配列確認",payrollTypeObj);
+              if(payrollTypeObj["payroll_type"] == "C" || payrollTypeObj["payroll_type"] == "D"){
+                console.log("c,dタイプ");
+                if(overStack60 > 3600){
+
+                  if(payrollTypeObj["payroll_type"] == "C"){
+                    oneday_payroll_over_60_hour += payrollTypeObj["total_time"];
+                  } else if(payrollTypeObj["payroll_type"] == "D"){
+                    oneday_payroll_midnight_over_60_hour += payrollTypeObj["total_time"];
+                  }
+
+                } else if(overStack60 + payrollTypeObj["total_time"] > 3600){
+                  
+                  if(payrollTypeObj["payroll_type"] == "C"){
+                    //oneday_payroll_over_60_hour += payrollTypeObj["total_time"];
+                    oneday_payroll_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
+                  } else if(payrollTypeObj["payroll_type"] == "D"){
+                    //oneday_payroll_midnight_over_60_hour += payrollTypeObj["total_time"];
+                    oneday_payroll_midnight_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
+                  }
+
+                }
+
+                overStack60 = overStack60 + payrollTypeObj["total_time"];
+              }
+            }
+          }
+          /////////////////////////
+
+
           //カスタム集計処理
           custom_onday_payroll.forEach(function (_, c_o_p_i) {
             const a_r = custom_onday_payroll[c_o_p_i]["agg_result"];
@@ -1333,6 +1387,10 @@ export const calculateTotalResultData =
         payroll_holiday = payroll_holiday + oneday_payroll_holiday;
         payroll_midnight_holiday =
           payroll_midnight_holiday + oneday_payroll_midnight_holiday;
+        
+        payroll_over_60_hour = payroll_over_60_hour + oneday_payroll_over_60_hour;
+        payroll_midnight_over_60_hour =
+            payroll_midnight_over_60_hour + oneday_payroll_midnight_over_60_hour;
       } else {
         //事前ループ
       }
@@ -2381,6 +2439,8 @@ export const calculateTotalResultData =
         payroll_midnight_over: oneday_payroll_midnight_over, //深夜_残業(D)
         payroll_holiday: oneday_payroll_holiday, //日中_休日(E)
         payroll_midnight_holiday: oneday_payroll_midnight_holiday, //深夜_休日(F)
+        payroll_over_60_hour: oneday_payroll_over_60_hour, //日中_残業60時間以上(C')
+        payroll_midnight_over_60_hour: oneday_payroll_midnight_over_60_hour, //深夜_残業60時間以上(D')
 
         ////////////////////////
         //分数単位
@@ -3354,6 +3414,8 @@ export const calculateTotalResultData =
       payroll_midnight_over: payroll_midnight_over, //D: 深夜_残業
       payroll_holiday: payroll_holiday, //E: 日中_休日
       payroll_midnight_holiday: payroll_midnight_holiday, //F: 深夜_休日
+      payroll_over_60_hour: payroll_over_60_hour, //C: 日中_残業
+      payroll_midnight_over_60_hour: payroll_midnight_over_60_hour, //D: 深夜_残業
 
       pro_custom_payroll: custom_payroll, //カスタム集計(時給時間帯)
       custom_payroll_time: custom_payroll_time, //企業ごとカスタム集計_合計時間
