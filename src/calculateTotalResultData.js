@@ -1095,22 +1095,43 @@ export const calculateTotalResultData =
               Deep_Night_AGG(obj["date"], w_b_obj)["night"]["total_time"]; //E: 日中_休日
 
             var dna_res = Deep_Night_AGG(obj["date"], w_b_obj);
-            if (dna_res["night"]["total_time"] != 0) {
-              oneday_payroll_type_breakdown.push({
-                start: dna_res["night"]["start"],
-                end: dna_res["night"]["end"],
-                total_time: dna_res["night"]["total_time"],
-                payroll_type: "F",
-              });
+            ///////////////
+            if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+              if (dna_res["nomal"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["nomal"]["start"],
+                  end: dna_res["nomal"]["end"],
+                  total_time: dna_res["nomal"]["total_time"],
+                  payroll_type: "E",
+                });
+              }
+              if (dna_res["night"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["night"]["start"],
+                  end: dna_res["night"]["end"],
+                  total_time: dna_res["night"]["total_time"],
+                  payroll_type: "F",
+                });
+              }
+            } else {
+              if (dna_res["night"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["night"]["start"],
+                  end: dna_res["night"]["end"],
+                  total_time: dna_res["night"]["total_time"],
+                  payroll_type: "F",
+                });
+              }
+              if (dna_res["nomal"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["nomal"]["start"],
+                  end: dna_res["nomal"]["end"],
+                  total_time: dna_res["nomal"]["total_time"],
+                  payroll_type: "E",
+                });
+              }
             }
-            if (dna_res["nomal"]["total_time"] != 0) {
-              oneday_payroll_type_breakdown.push({
-                start: dna_res["nomal"]["start"],
-                end: dna_res["nomal"]["end"],
-                total_time: dna_res["nomal"]["total_time"],
-                payroll_type: "E",
-              });
-            }
+            ///////////////
           } else {
             //console.log("平日、所定休日判定");
             //A,B,C,D算出
@@ -1135,22 +1156,43 @@ export const calculateTotalResultData =
                 Deep_Night_AGG(obj["date"], w_b_obj)["night"]["total_time"]; //A: 日中_通常
 
               var dna_res = Deep_Night_AGG(obj["date"], w_b_obj);
-              if (dna_res["night"]["total_time"] != 0) {
-                oneday_payroll_type_breakdown.push({
-                  start: dna_res["night"]["start"],
-                  end: dna_res["night"]["end"],
-                  total_time: dna_res["night"]["total_time"],
-                  payroll_type: "B",
-                });
+              ///////////////
+              if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                if (dna_res["nomal"]["total_time"] != 0) {
+                  oneday_payroll_type_breakdown.push({
+                    start: dna_res["nomal"]["start"],
+                    end: dna_res["nomal"]["end"],
+                    total_time: dna_res["nomal"]["total_time"],
+                    payroll_type: "A",
+                  });
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "B",
+                    });
+                  }
+                }
+              } else {
+                if (dna_res["night"]["total_time"] != 0) {
+                  oneday_payroll_type_breakdown.push({
+                    start: dna_res["night"]["start"],
+                    end: dna_res["night"]["end"],
+                    total_time: dna_res["night"]["total_time"],
+                    payroll_type: "B",
+                  });
+                }
+                if (dna_res["nomal"]["total_time"] != 0) {
+                  oneday_payroll_type_breakdown.push({
+                    start: dna_res["nomal"]["start"],
+                    end: dna_res["nomal"]["end"],
+                    total_time: dna_res["nomal"]["total_time"],
+                    payroll_type: "A",
+                  });
+                }
               }
-              if (dna_res["nomal"]["total_time"] != 0) {
-                oneday_payroll_type_breakdown.push({
-                  start: dna_res["nomal"]["start"],
-                  end: dna_res["nomal"]["end"],
-                  total_time: dna_res["nomal"]["total_time"],
-                  payroll_type: "A",
-                });
-              }
+              ///////////////
             } else {
               //通常労働上限の処理
               if (
@@ -1167,22 +1209,43 @@ export const calculateTotalResultData =
                   Deep_Night_AGG(obj["date"], w_b_obj)["night"]["total_time"]; //C: 日中_残業
 
                 var dna_res = Deep_Night_AGG(obj["date"], w_b_obj);
-                if (dna_res["night"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["night"]["start"],
-                    end: dna_res["night"]["end"],
-                    total_time: dna_res["night"]["total_time"],
-                    payroll_type: "D",
-                  });
+                ///////////////
+                if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                } else {
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
                 }
-                if (dna_res["nomal"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["nomal"]["start"],
-                    end: dna_res["nomal"]["end"],
-                    total_time: dna_res["nomal"]["total_time"],
-                    payroll_type: "C",
-                  });
-                }
+                ///////////////
               } else {
                 //端数が上限以上(残業)
                 var fraction_time = 0;
@@ -1225,22 +1288,43 @@ export const calculateTotalResultData =
                   ]; //A: 日中_通常
 
                 var dna_res = Deep_Night_AGG(obj["date"], fraction_obj);
-                if (dna_res["night"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["night"]["start"],
-                    end: dna_res["night"]["end"],
-                    total_time: dna_res["night"]["total_time"],
-                    payroll_type: "B",
-                  });
+                ///////////////
+                if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "A",
+                    });
+                  }
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "B",
+                    });
+                  }
+                } else {
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "B",
+                    });
+                  }
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "A",
+                    });
+                  }
                 }
-                if (dna_res["nomal"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["nomal"]["start"],
-                    end: dna_res["nomal"]["end"],
-                    total_time: dna_res["nomal"]["total_time"],
-                    payroll_type: "A",
-                  });
-                }
+                ///////////////
 
                 var alone_total_time =
                   Number(w_b_obj["total_time"]) - Number(fraction_time);
@@ -1262,22 +1346,43 @@ export const calculateTotalResultData =
                   ]; //C: 日中_残業
 
                 dna_res = Deep_Night_AGG(obj["date"], fraction_obj);
-                if (dna_res["night"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["night"]["start"],
-                    end: dna_res["night"]["end"],
-                    total_time: dna_res["night"]["total_time"],
-                    payroll_type: "D",
-                  });
+                ///////////////
+                if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                } else {
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
                 }
-                if (dna_res["nomal"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["nomal"]["start"],
-                    end: dna_res["nomal"]["end"],
-                    total_time: dna_res["nomal"]["total_time"],
-                    payroll_type: "C",
-                  });
-                }
+                ///////////////
               }
             }
           }
