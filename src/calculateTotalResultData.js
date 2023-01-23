@@ -1388,29 +1388,23 @@ export const calculateTotalResultData =
           }
 
           /////////////////////////
-          //A~F内わけ配列を時系列順に並び替え
-          // let a = oneday_payroll_type_breakdown;
-          //oneday_payroll_type_breakdown = [];
-          /////////////////////////
-          //60を越えている場合
-          console.log("残業累積確認",obj["date"],payroll_over, payroll_midnight_over, oneday_payroll_over, oneday_payroll_midnight_over);
+          //60以上の残業C',D'の集計
+          //console.log("残業累積確認",obj["date"],payroll_over, payroll_midnight_over, oneday_payroll_over, oneday_payroll_midnight_over);
           if(3600 < payroll_over + payroll_midnight_over){
-            console.log("残業60越え(全て)",obj["date"],oneday_payroll_over_60_hour);
-            //oneday_payroll_over_60_hour = oneday_payroll_over + oneday_payroll_midnight_over; 
+            //console.log("残業60越え(全て)",obj["date"],oneday_payroll_over_60_hour);
             oneday_payroll_over_60_hour = oneday_payroll_over;
             oneday_payroll_midnight_over_60_hour = oneday_payroll_midnight_over;
           } else if(3600 < payroll_over + payroll_midnight_over + oneday_payroll_over + oneday_payroll_midnight_over){
-            console.log("残業60越え(一部)",obj["date"],oneday_payroll_over_60_hour);
-            //oneday_payroll_over_60_hour = payroll_over + payroll_midnight_over + oneday_payroll_over + oneday_payroll_midnight_over - 3600;
+            //console.log("残業60越え(一部)",obj["date"],oneday_payroll_over_60_hour);
             
             let overStack60 = payroll_over + payroll_midnight_over;
 
-            //console.log("配列確認",oneday_payroll_type_breakdown);
             for(let payrollTypeObj of oneday_payroll_type_breakdown){
-              console.log("配列確認",payrollTypeObj);
+              //console.log("配列確認",payrollTypeObj);
               if(payrollTypeObj["payroll_type"] == "C" || payrollTypeObj["payroll_type"] == "D"){
-                console.log("c,dタイプ");
+                //C,Dだったら処理　※法休かどうかはA~Fの振り分けの時に考慮しているので気にしなくてよい
                 if(overStack60 > 3600){
+                  //全ての時間が60時間を越えている
 
                   if(payrollTypeObj["payroll_type"] == "C"){
                     oneday_payroll_over_60_hour += payrollTypeObj["total_time"];
@@ -1419,12 +1413,11 @@ export const calculateTotalResultData =
                   }
 
                 } else if(overStack60 + payrollTypeObj["total_time"] > 3600){
+                  //一部の時間が60時間を越えている
                   
                   if(payrollTypeObj["payroll_type"] == "C"){
-                    //oneday_payroll_over_60_hour += payrollTypeObj["total_time"];
                     oneday_payroll_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
                   } else if(payrollTypeObj["payroll_type"] == "D"){
-                    //oneday_payroll_midnight_over_60_hour += payrollTypeObj["total_time"];
                     oneday_payroll_midnight_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
                   }
 
