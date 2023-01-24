@@ -177,7 +177,7 @@ export const calculateTotalResultData =
       csv_body_str +=
         "日付,シフト名,シフト,実績,勤務状況,勤務時間,休憩時間,シフト時間,所定労働時間,残業時間,シフト外時間";
       csv_body_str +=
-        ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_休日(E),深夜_休日(F)";
+        ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_残業60h以上(C'),深夜_残業60h以上(D'),日中_休日(E),深夜_休日(F)";
       csv_body_str +=
         ",法定内残業,法定外残業,深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
 
@@ -1395,7 +1395,7 @@ export const calculateTotalResultData =
             //console.log("残業60越え(全て)",obj["date"],oneday_payroll_over_60_hour);
             oneday_payroll_over_60_hour = oneday_payroll_over;
             oneday_payroll_midnight_over_60_hour = oneday_payroll_midnight_over;
-            
+
             for(let payrollTypeObj of oneday_payroll_type_breakdown){
               //console.log("配列確認",payrollTypeObj);
               if(payrollTypeObj["payroll_type"] == "C" || payrollTypeObj["payroll_type"] == "D"){
@@ -1960,6 +1960,13 @@ export const calculateTotalResultData =
                   Math.round(
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:四捨五入
+                oneday_payroll_over_60_hour =
+                  Math.round(oneday_payroll_over_60_hour / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //C': 日中_残業60時間以上:四捨五入
+                oneday_payroll_midnight_over_60_hour =
+                  Math.round(
+                    oneday_payroll_midnight_over_60_hour / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //D': 深夜_残業60時間以上:四捨五入
                 //カスタム集計
                 custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
@@ -2062,6 +2069,13 @@ export const calculateTotalResultData =
                   Math.ceil(
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:切り上げ
+                oneday_payroll_over_60_hour =
+                  Math.ceil(oneday_payroll_over_60_hour / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //C': 日中_残業60時間以上:切り上げ
+                oneday_payroll_midnight_over_60_hour =
+                  Math.ceil(
+                    oneday_payroll_midnight_over_60_hour / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り上げ
                 //カスタム集計
                 custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
@@ -2166,6 +2180,13 @@ export const calculateTotalResultData =
                   Math.floor(
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:切り捨て
+                oneday_payroll_over_60_hour =
+                  Math.floor(oneday_payroll_over_60_hour / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //C': 日中_残業60時間以上:切り捨て
+                oneday_payroll_midnight_over_60_hour =
+                  Math.floor(
+                    oneday_payroll_midnight_over_60_hour / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り捨て
                 //カスタム集計
                 custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
@@ -2362,6 +2383,16 @@ export const calculateTotalResultData =
           ":" +
           ("0" + (Number(oneday_payroll_midnight_over) % 60)).slice(-2) +
           ","; //深夜_残業(D)
+        csv_body_str +=
+          Math.floor(Number(oneday_payroll_over_60_hour) / 60) +
+          ":" +
+          ("0" + (Number(oneday_payroll_over_60_hour) % 60)).slice(-2) +
+          ","; //日中_残業60時間以上(C')
+        csv_body_str +=
+          Math.floor(Number(oneday_payroll_midnight_over_60_hour) / 60) +
+          ":" +
+          ("0" + (Number(oneday_payroll_midnight_over_60_hour) % 60)).slice(-2) +
+          ","; //深夜_残業60時間以上(D')
         csv_body_str +=
           Math.floor(Number(oneday_payroll_holiday) / 60) +
           ":" +
