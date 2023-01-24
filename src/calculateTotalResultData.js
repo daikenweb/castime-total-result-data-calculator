@@ -2780,8 +2780,14 @@ export const calculateTotalResultData =
                 Number(rounding_option[0]); //E: 日中_休日:四捨五入
               payroll_midnight_holiday =
                 Math.round(
-                  payroll_midnight_holiday / Number(rounding_option[0])
+              payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:四捨五入
+              payroll_over_60_hour =
+                Math.round(payroll_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //C': 日中_残業60時間以上:四捨五入
+              payroll_midnight_over_60_hour =
+                Math.round(payroll_midnight_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //D': 深夜_残業60時間以上:四捨五入
               //カスタム集計
               custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
@@ -2859,6 +2865,12 @@ export const calculateTotalResultData =
                 Math.ceil(
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:切り上げ
+              payroll_over_60_hour =
+                Math.ceil(payroll_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //C': 日中_残業60時間以上:切り上げ
+              payroll_midnight_over_60_hour =
+                Math.ceil(payroll_midnight_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り上げ
               //カスタム集計
               custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
@@ -2937,6 +2949,12 @@ export const calculateTotalResultData =
                 Math.floor(
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:切り捨て
+              payroll_over_60_hour =
+                Math.floor(payroll_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //C': 日中_残業60時間以上:切り捨て
+              payroll_midnight_over_60_hour =
+                Math.floor(payroll_midnight_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り捨て
               //カスタム集計
               custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
@@ -3133,6 +3151,18 @@ export const calculateTotalResultData =
         (Math.floor(payroll_midnight_over / 60) +
           ":" +
           ("0" + (payroll_midnight_over % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "日中_残業60h以上(C')," +
+        (Math.floor(payroll_over_60_hour / 60) +
+          ":" +
+          ("0" + (payroll_over_60_hour % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "深夜_残業60h以上(D')," +
+        (Math.floor(payroll_midnight_over_60_hour / 60) +
+          ":" +
+          ("0" + (payroll_midnight_over_60_hour % 60)).slice(-2)) +
         "\n";
       csv_header_str +=
         "日中_休日(E)," +
@@ -3580,8 +3610,8 @@ export const calculateTotalResultData =
       payroll_midnight_over: payroll_midnight_over, //D: 深夜_残業
       payroll_holiday: payroll_holiday, //E: 日中_休日
       payroll_midnight_holiday: payroll_midnight_holiday, //F: 深夜_休日
-      payroll_over_60_hour: payroll_over_60_hour, //C: 日中_残業
-      payroll_midnight_over_60_hour: payroll_midnight_over_60_hour, //D: 深夜_残業
+      payroll_over_60_hour: payroll_over_60_hour, //C': 日中_残業60時間以上
+      payroll_midnight_over_60_hour: payroll_midnight_over_60_hour, //D': 深夜_残業60時間以上
 
       pro_custom_payroll: custom_payroll, //カスタム集計(時給時間帯)
       custom_payroll_time: custom_payroll_time, //企業ごとカスタム集計_合計時間
