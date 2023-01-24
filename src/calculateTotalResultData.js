@@ -922,7 +922,8 @@ export const calculateTotalResultData =
       var oneday_payroll_midnight_holiday = 0; //F: 深夜_休日
       let oneday_payroll_over_60_hour = 0; //C': 日中_残業60時間以上
       let oneday_payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
-      var oneday_payroll_type_breakdown = []; //グラフ表示のために給与タイプの時刻内わけ配列を作成
+      let oneday_payroll_type_breakdown = []; //グラフ表示のために給与タイプの時刻内わけ配列を作成
+      let oneday_payroll_over_60_hour_breakdown = []; //グラフ表示用残業60時間以上時刻内わけ
 
       let custom_onday_payroll = []; //企業ごとカスタム集計
       //企業ごとカスタム集計枠設定
@@ -1394,6 +1395,22 @@ export const calculateTotalResultData =
             //console.log("残業60越え(全て)",obj["date"],oneday_payroll_over_60_hour);
             oneday_payroll_over_60_hour = oneday_payroll_over;
             oneday_payroll_midnight_over_60_hour = oneday_payroll_midnight_over;
+            
+            for(let payrollTypeObj of oneday_payroll_type_breakdown){
+              //console.log("配列確認",payrollTypeObj);
+              if(payrollTypeObj["payroll_type"] == "C" || payrollTypeObj["payroll_type"] == "D"){
+
+                oneday_payroll_over_60_hour_breakdown.push(payrollTypeObj); //配列挿入
+
+                if(payrollTypeObj["payroll_type"] == "C"){
+                  oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "C'"; //配列のタイプ部分変更
+                } else if(payrollTypeObj["payroll_type"] == "D"){
+                  oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "D'"; //配列のタイプ部分変更
+                }
+
+              }
+            }
+
           } else if(3600 < payroll_over + payroll_midnight_over + oneday_payroll_over + oneday_payroll_midnight_over){
             //console.log("残業60越え(一部)",obj["date"],oneday_payroll_over_60_hour);
             
@@ -1408,17 +1425,36 @@ export const calculateTotalResultData =
 
                   if(payrollTypeObj["payroll_type"] == "C"){
                     oneday_payroll_over_60_hour += payrollTypeObj["total_time"];
+
+                    oneday_payroll_over_60_hour_breakdown.push(payrollTypeObj); //配列挿入
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "C'"; //配列のタイプ部分変更
                   } else if(payrollTypeObj["payroll_type"] == "D"){
                     oneday_payroll_midnight_over_60_hour += payrollTypeObj["total_time"];
+
+                    oneday_payroll_over_60_hour_breakdown.push(payrollTypeObj); //配列挿入
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "D'"; //配列のタイプ部分変更
                   }
 
                 } else if(overStack60 + payrollTypeObj["total_time"] > 3600){
                   //一部の時間が60時間を越えている
                   
+                  let totalTime = (overStack60 + payrollTypeObj["total_time"]) - 3600;
+                  let start = moment(payrollTypeObj["end"]).subtract(totalTime, 'm').format('YYYY-MM-DD HH:mm:ss');
+                  oneday_payroll_over_60_hour_breakdown.push({
+                    start: start,
+                    end: payrollTypeObj["end"],
+                    total_time: totalTime,
+                    payroll_type: payrollTypeObj["payroll_type"],
+                  });
+                  
                   if(payrollTypeObj["payroll_type"] == "C"){
                     oneday_payroll_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
+
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "C'"; //配列のタイプ部分変更
                   } else if(payrollTypeObj["payroll_type"] == "D"){
                     oneday_payroll_midnight_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
+
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "D'"; //配列のタイプ部分変更
                   }
 
                 }
@@ -2531,6 +2567,7 @@ export const calculateTotalResultData =
         //給与計算用項目(分)
         normal_work_limit: obj["normal_work_limit"], //法定内労働の上限
         payroll_type_breakdown: oneday_payroll_type_breakdown, //グラフ表示用時刻内わけ
+        payroll_over_60_hour_breakdown: oneday_payroll_over_60_hour_breakdown, //グラフ表示用残業60時間以上時刻内わけ
         payroll_nomal: oneday_payroll_nomal, //日中_通常(A)
         payroll_midnight_nomal: oneday_payroll_midnight_nomal, //深夜_通常(B)
         payroll_over: oneday_payroll_over, //日中_残業(C)
