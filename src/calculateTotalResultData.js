@@ -47,6 +47,8 @@ export const calculateTotalResultData =
     let payroll_midnight_holiday = 0; //F: 深夜_休日
     let payroll_over_60_hour = 0; //C': 日中_残業60時間以上
     let payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
+    let payroll_over_inner_60_hour = 0; //C'': 日中_残業60時間以内
+    let payroll_midnight_over_inner_60_hour = 0; //D'': 深夜_残業60時間以内
 
     let custom_payroll = []; //カスタム集計(時給時間帯)
     let custom_payroll_time = 0; //企業ごとカスタム集計_合計時間
@@ -922,6 +924,8 @@ export const calculateTotalResultData =
       var oneday_payroll_midnight_holiday = 0; //F: 深夜_休日
       let oneday_payroll_over_60_hour = 0; //C': 日中_残業60時間以上
       let oneday_payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
+      let oneday_payroll_over_inner_60_hour = 0; //C'': 日中_残業60時間以内
+      let oneday_payroll_midnight_over_inner_60_hour = 0; //D'': 深夜_残業60時間以内
       let oneday_payroll_type_breakdown = []; //グラフ表示のために給与タイプの時刻内わけ配列を作成
       let oneday_payroll_over_60_hour_breakdown = []; //グラフ表示用残業60時間以上時刻内わけ
 
@@ -2281,6 +2285,12 @@ export const calculateTotalResultData =
         line_work_time - line_shift_time,
         0
       ); //値がマイナスになってしまう場合は0にしておく//残業時間(勤務時間-シフト合計)
+
+      //C'': 日中_残業60時間以内
+      oneday_payroll_over_inner_60_hour = oneday_payroll_over - oneday_payroll_over_60_hour;
+      //D'': 深夜_残業60時間以内
+      oneday_payroll_midnight_over_inner_60_hour = oneday_payroll_midnight_over - oneday_payroll_midnight_over_60_hour;
+
       let line_legal_over_time =
         oneday_payroll_over + oneday_payroll_midnight_over; //法定外残業時間(C+D)
       let line_deep_night_time =
@@ -2607,6 +2617,8 @@ export const calculateTotalResultData =
         payroll_midnight_holiday: oneday_payroll_midnight_holiday, //深夜_休日(F)
         payroll_over_60_hour: oneday_payroll_over_60_hour, //日中_残業60時間以上(C')
         payroll_midnight_over_60_hour: oneday_payroll_midnight_over_60_hour, //深夜_残業60時間以上(D')
+        payroll_over_inner_60_hour: oneday_payroll_over_inner_60_hour, //日中_残業60時間以内(C'')
+        payroll_midnight_over_inner_60_hour: oneday_payroll_midnight_over_inner_60_hour, //深夜_残業60時間以内(D'')
 
         ////////////////////////
         //分数単位
@@ -2988,6 +3000,12 @@ export const calculateTotalResultData =
       payroll_midnight_over +
       payroll_holiday +
       payroll_midnight_holiday;
+    
+    //C'': 日中_残業60時間以内
+    payroll_over_inner_60_hour = payroll_over - payroll_over_60_hour;
+    //D'': 深夜_残業60時間以内
+    payroll_midnight_over_inner_60_hour = payroll_midnight_over - payroll_midnight_over_60_hour;
+      
     //法定外残業時間(C+D)
     legal_works.over = payroll_over + payroll_midnight_over;
     //深夜労働(B+D+F)
@@ -3612,6 +3630,8 @@ export const calculateTotalResultData =
       payroll_midnight_holiday: payroll_midnight_holiday, //F: 深夜_休日
       payroll_over_60_hour: payroll_over_60_hour, //C': 日中_残業60時間以上
       payroll_midnight_over_60_hour: payroll_midnight_over_60_hour, //D': 深夜_残業60時間以上
+      payroll_over_inner_60_hour: payroll_over_inner_60_hour, //C'': 日中_残業60時間以内
+      payroll_midnight_over_inner_60_hour: payroll_midnight_over_inner_60_hour, //D'': 深夜_残業60時間以内
 
       pro_custom_payroll: custom_payroll, //カスタム集計(時給時間帯)
       custom_payroll_time: custom_payroll_time, //企業ごとカスタム集計_合計時間
