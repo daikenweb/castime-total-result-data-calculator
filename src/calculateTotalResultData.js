@@ -45,6 +45,10 @@ export const calculateTotalResultData =
     let payroll_midnight_over = 0; //D: 深夜_残業
     let payroll_holiday = 0; //E: 日中_休日
     let payroll_midnight_holiday = 0; //F: 深夜_休日
+    let payroll_over_60_hour = 0; //C': 日中_残業60時間以上
+    let payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
+    let payroll_over_inner_60_hour = 0; //C'': 日中_残業60時間以内
+    let payroll_midnight_over_inner_60_hour = 0; //D'': 深夜_残業60時間以内
 
     let custom_payroll = []; //カスタム集計(時給時間帯)
     let custom_payroll_time = 0; //企業ごとカスタム集計_合計時間
@@ -72,6 +76,8 @@ export const calculateTotalResultData =
     let works = { over: 0 }; //シフト外残業(退勤シフト時刻以降の時間帯の勤務時間を集計)
     let pro_legal_inner_works_over = 0; //法定内残業
     let legal_works = { over: 0 }; //法定外残業(C+D)
+    let legal_works_over_inner_60_hour = 0; //法定外残業(C+D)_60時間以内
+    let legal_works_over_60_hour = 0; //法定外残業(C+D)_60時間以上
     let pro_late_night_work_time = 0; //深夜労働(B+D+F)
     let pro_holiday_work_time = 0; //休日労働(E+F)
     let pro_absence_time = 0; //全日欠勤時間
@@ -175,9 +181,9 @@ export const calculateTotalResultData =
       csv_body_str +=
         "日付,シフト名,シフト,実績,勤務状況,勤務時間,休憩時間,シフト時間,所定労働時間,残業時間,シフト外時間";
       csv_body_str +=
-        ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_休日(E),深夜_休日(F)";
+        ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_残業60h以上(C'),深夜_残業60h以上(D'),日中_休日(E),深夜_休日(F)";
       csv_body_str +=
-        ",法定内残業,法定外残業,深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
+        ",法定内残業,法定外残業,法定外残業(60時間以内),法定外残業(60時間以上),深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
 
       custom_payroll.forEach(function (c_p_obj) {
         //時給時間帯項目追加
@@ -918,7 +924,12 @@ export const calculateTotalResultData =
       var oneday_payroll_midnight_over = 0; //D: 深夜_残業
       var oneday_payroll_holiday = 0; //E: 日中_休日
       var oneday_payroll_midnight_holiday = 0; //F: 深夜_休日
-      var oneday_payroll_type_breakdown = []; //グラフ表示のために給与タイプの時刻内わけ配列を作成
+      let oneday_payroll_over_60_hour = 0; //C': 日中_残業60時間以上
+      let oneday_payroll_midnight_over_60_hour = 0; //D': 深夜_残業60時間以上
+      let oneday_payroll_over_inner_60_hour = 0; //C'': 日中_残業60時間以内
+      let oneday_payroll_midnight_over_inner_60_hour = 0; //D'': 深夜_残業60時間以内
+      let oneday_payroll_type_breakdown = []; //グラフ表示のために給与タイプの時刻内わけ配列を作成
+      let oneday_payroll_over_60_hour_breakdown = []; //グラフ表示用残業60時間以上時刻内わけ
 
       let custom_onday_payroll = []; //企業ごとカスタム集計
       //企業ごとカスタム集計枠設定
@@ -1091,22 +1102,43 @@ export const calculateTotalResultData =
               Deep_Night_AGG(obj["date"], w_b_obj)["night"]["total_time"]; //E: 日中_休日
 
             var dna_res = Deep_Night_AGG(obj["date"], w_b_obj);
-            if (dna_res["night"]["total_time"] != 0) {
-              oneday_payroll_type_breakdown.push({
-                start: dna_res["night"]["start"],
-                end: dna_res["night"]["end"],
-                total_time: dna_res["night"]["total_time"],
-                payroll_type: "F",
-              });
+            ///////////////
+            if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+              if (dna_res["nomal"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["nomal"]["start"],
+                  end: dna_res["nomal"]["end"],
+                  total_time: dna_res["nomal"]["total_time"],
+                  payroll_type: "E",
+                });
+              }
+              if (dna_res["night"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["night"]["start"],
+                  end: dna_res["night"]["end"],
+                  total_time: dna_res["night"]["total_time"],
+                  payroll_type: "F",
+                });
+              }
+            } else {
+              if (dna_res["night"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["night"]["start"],
+                  end: dna_res["night"]["end"],
+                  total_time: dna_res["night"]["total_time"],
+                  payroll_type: "F",
+                });
+              }
+              if (dna_res["nomal"]["total_time"] != 0) {
+                oneday_payroll_type_breakdown.push({
+                  start: dna_res["nomal"]["start"],
+                  end: dna_res["nomal"]["end"],
+                  total_time: dna_res["nomal"]["total_time"],
+                  payroll_type: "E",
+                });
+              }
             }
-            if (dna_res["nomal"]["total_time"] != 0) {
-              oneday_payroll_type_breakdown.push({
-                start: dna_res["nomal"]["start"],
-                end: dna_res["nomal"]["end"],
-                total_time: dna_res["nomal"]["total_time"],
-                payroll_type: "E",
-              });
-            }
+            ///////////////
           } else {
             //console.log("平日、所定休日判定");
             //A,B,C,D算出
@@ -1131,22 +1163,43 @@ export const calculateTotalResultData =
                 Deep_Night_AGG(obj["date"], w_b_obj)["night"]["total_time"]; //A: 日中_通常
 
               var dna_res = Deep_Night_AGG(obj["date"], w_b_obj);
-              if (dna_res["night"]["total_time"] != 0) {
-                oneday_payroll_type_breakdown.push({
-                  start: dna_res["night"]["start"],
-                  end: dna_res["night"]["end"],
-                  total_time: dna_res["night"]["total_time"],
-                  payroll_type: "B",
-                });
+              ///////////////
+              if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                if (dna_res["nomal"]["total_time"] != 0) {
+                  oneday_payroll_type_breakdown.push({
+                    start: dna_res["nomal"]["start"],
+                    end: dna_res["nomal"]["end"],
+                    total_time: dna_res["nomal"]["total_time"],
+                    payroll_type: "A",
+                  });
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "B",
+                    });
+                  }
+                }
+              } else {
+                if (dna_res["night"]["total_time"] != 0) {
+                  oneday_payroll_type_breakdown.push({
+                    start: dna_res["night"]["start"],
+                    end: dna_res["night"]["end"],
+                    total_time: dna_res["night"]["total_time"],
+                    payroll_type: "B",
+                  });
+                }
+                if (dna_res["nomal"]["total_time"] != 0) {
+                  oneday_payroll_type_breakdown.push({
+                    start: dna_res["nomal"]["start"],
+                    end: dna_res["nomal"]["end"],
+                    total_time: dna_res["nomal"]["total_time"],
+                    payroll_type: "A",
+                  });
+                }
               }
-              if (dna_res["nomal"]["total_time"] != 0) {
-                oneday_payroll_type_breakdown.push({
-                  start: dna_res["nomal"]["start"],
-                  end: dna_res["nomal"]["end"],
-                  total_time: dna_res["nomal"]["total_time"],
-                  payroll_type: "A",
-                });
-              }
+              ///////////////
             } else {
               //通常労働上限の処理
               if (
@@ -1163,22 +1216,43 @@ export const calculateTotalResultData =
                   Deep_Night_AGG(obj["date"], w_b_obj)["night"]["total_time"]; //C: 日中_残業
 
                 var dna_res = Deep_Night_AGG(obj["date"], w_b_obj);
-                if (dna_res["night"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["night"]["start"],
-                    end: dna_res["night"]["end"],
-                    total_time: dna_res["night"]["total_time"],
-                    payroll_type: "D",
-                  });
+                ///////////////
+                if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                } else {
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
                 }
-                if (dna_res["nomal"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["nomal"]["start"],
-                    end: dna_res["nomal"]["end"],
-                    total_time: dna_res["nomal"]["total_time"],
-                    payroll_type: "C",
-                  });
-                }
+                ///////////////
               } else {
                 //端数が上限以上(残業)
                 var fraction_time = 0;
@@ -1221,22 +1295,43 @@ export const calculateTotalResultData =
                   ]; //A: 日中_通常
 
                 var dna_res = Deep_Night_AGG(obj["date"], fraction_obj);
-                if (dna_res["night"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["night"]["start"],
-                    end: dna_res["night"]["end"],
-                    total_time: dna_res["night"]["total_time"],
-                    payroll_type: "B",
-                  });
+                ///////////////
+                if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "A",
+                    });
+                  }
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "B",
+                    });
+                  }
+                } else {
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "B",
+                    });
+                  }
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "A",
+                    });
+                  }
                 }
-                if (dna_res["nomal"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["nomal"]["start"],
-                    end: dna_res["nomal"]["end"],
-                    total_time: dna_res["nomal"]["total_time"],
-                    payroll_type: "A",
-                  });
-                }
+                ///////////////
 
                 var alone_total_time =
                   Number(w_b_obj["total_time"]) - Number(fraction_time);
@@ -1258,25 +1353,124 @@ export const calculateTotalResultData =
                   ]; //C: 日中_残業
 
                 dna_res = Deep_Night_AGG(obj["date"], fraction_obj);
-                if (dna_res["night"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["night"]["start"],
-                    end: dna_res["night"]["end"],
-                    total_time: dna_res["night"]["total_time"],
-                    payroll_type: "D",
-                  });
+                ///////////////
+                if(moment(dna_res["nomal"]["start"]) < moment(dna_res["night"]["start"])){
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                } else {
+                  if (dna_res["night"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["night"]["start"],
+                      end: dna_res["night"]["end"],
+                      total_time: dna_res["night"]["total_time"],
+                      payroll_type: "D",
+                    });
+                  }
+                  if (dna_res["nomal"]["total_time"] != 0) {
+                    oneday_payroll_type_breakdown.push({
+                      start: dna_res["nomal"]["start"],
+                      end: dna_res["nomal"]["end"],
+                      total_time: dna_res["nomal"]["total_time"],
+                      payroll_type: "C",
+                    });
+                  }
                 }
-                if (dna_res["nomal"]["total_time"] != 0) {
-                  oneday_payroll_type_breakdown.push({
-                    start: dna_res["nomal"]["start"],
-                    end: dna_res["nomal"]["end"],
-                    total_time: dna_res["nomal"]["total_time"],
-                    payroll_type: "C",
-                  });
-                }
+                ///////////////
               }
             }
           }
+
+          /////////////////////////
+          //60以上の残業C',D'の集計
+          //console.log("残業累積確認",obj["date"],payroll_over, payroll_midnight_over, oneday_payroll_over, oneday_payroll_midnight_over);
+          if(3600 < payroll_over + payroll_midnight_over){
+            //console.log("残業60越え(全て)",obj["date"],oneday_payroll_over_60_hour);
+            oneday_payroll_over_60_hour = oneday_payroll_over;
+            oneday_payroll_midnight_over_60_hour = oneday_payroll_midnight_over;
+
+            for(let payrollTypeObj of oneday_payroll_type_breakdown){
+              //console.log("配列確認",payrollTypeObj);
+              if(payrollTypeObj["payroll_type"] == "C" || payrollTypeObj["payroll_type"] == "D"){
+
+                oneday_payroll_over_60_hour_breakdown.push(payrollTypeObj); //配列挿入
+
+                if(payrollTypeObj["payroll_type"] == "C"){
+                  oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "C'"; //配列のタイプ部分変更
+                } else if(payrollTypeObj["payroll_type"] == "D"){
+                  oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "D'"; //配列のタイプ部分変更
+                }
+
+              }
+            }
+
+          } else if(3600 < payroll_over + payroll_midnight_over + oneday_payroll_over + oneday_payroll_midnight_over){
+            //console.log("残業60越え(一部)",obj["date"],oneday_payroll_over_60_hour);
+            
+            let overStack60 = payroll_over + payroll_midnight_over;
+
+            for(let payrollTypeObj of oneday_payroll_type_breakdown){
+              //console.log("配列確認",payrollTypeObj);
+              if(payrollTypeObj["payroll_type"] == "C" || payrollTypeObj["payroll_type"] == "D"){
+                //C,Dだったら処理　※法休かどうかはA~Fの振り分けの時に考慮しているので気にしなくてよい
+                if(overStack60 > 3600){
+                  //全ての時間が60時間を越えている
+
+                  if(payrollTypeObj["payroll_type"] == "C"){
+                    oneday_payroll_over_60_hour += payrollTypeObj["total_time"];
+
+                    oneday_payroll_over_60_hour_breakdown.push(payrollTypeObj); //配列挿入
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "C'"; //配列のタイプ部分変更
+                  } else if(payrollTypeObj["payroll_type"] == "D"){
+                    oneday_payroll_midnight_over_60_hour += payrollTypeObj["total_time"];
+
+                    oneday_payroll_over_60_hour_breakdown.push(payrollTypeObj); //配列挿入
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "D'"; //配列のタイプ部分変更
+                  }
+
+                } else if(overStack60 + payrollTypeObj["total_time"] > 3600){
+                  //一部の時間が60時間を越えている
+                  
+                  let totalTime = (overStack60 + payrollTypeObj["total_time"]) - 3600;
+                  let start = moment(payrollTypeObj["end"]).subtract(totalTime, 'm').format('YYYY-MM-DD HH:mm:ss');
+                  oneday_payroll_over_60_hour_breakdown.push({
+                    start: start,
+                    end: payrollTypeObj["end"],
+                    total_time: totalTime,
+                    payroll_type: payrollTypeObj["payroll_type"],
+                  });
+                  
+                  if(payrollTypeObj["payroll_type"] == "C"){
+                    oneday_payroll_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
+
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "C'"; //配列のタイプ部分変更
+                  } else if(payrollTypeObj["payroll_type"] == "D"){
+                    oneday_payroll_midnight_over_60_hour += (overStack60 + payrollTypeObj["total_time"]) - 3600;
+
+                    oneday_payroll_over_60_hour_breakdown[oneday_payroll_over_60_hour_breakdown.length - 1]["payroll_type"] = "D'"; //配列のタイプ部分変更
+                  }
+
+                }
+
+                overStack60 = overStack60 + payrollTypeObj["total_time"];
+              }
+            }
+          }
+          /////////////////////////
+
 
           //カスタム集計処理
           custom_onday_payroll.forEach(function (_, c_o_p_i) {
@@ -1333,6 +1527,10 @@ export const calculateTotalResultData =
         payroll_holiday = payroll_holiday + oneday_payroll_holiday;
         payroll_midnight_holiday =
           payroll_midnight_holiday + oneday_payroll_midnight_holiday;
+        
+        payroll_over_60_hour = payroll_over_60_hour + oneday_payroll_over_60_hour;
+        payroll_midnight_over_60_hour =
+            payroll_midnight_over_60_hour + oneday_payroll_midnight_over_60_hour;
       } else {
         //事前ループ
       }
@@ -1768,6 +1966,13 @@ export const calculateTotalResultData =
                   Math.round(
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:四捨五入
+                oneday_payroll_over_60_hour =
+                  Math.round(oneday_payroll_over_60_hour / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //C': 日中_残業60時間以上:四捨五入
+                oneday_payroll_midnight_over_60_hour =
+                  Math.round(
+                    oneday_payroll_midnight_over_60_hour / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //D': 深夜_残業60時間以上:四捨五入
                 //カスタム集計
                 custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
@@ -1870,6 +2075,13 @@ export const calculateTotalResultData =
                   Math.ceil(
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:切り上げ
+                oneday_payroll_over_60_hour =
+                  Math.ceil(oneday_payroll_over_60_hour / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //C': 日中_残業60時間以上:切り上げ
+                oneday_payroll_midnight_over_60_hour =
+                  Math.ceil(
+                    oneday_payroll_midnight_over_60_hour / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り上げ
                 //カスタム集計
                 custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
@@ -1974,6 +2186,13 @@ export const calculateTotalResultData =
                   Math.floor(
                     oneday_payroll_midnight_holiday / Number(rounding_option[0])
                   ) * Number(rounding_option[0]); //F: 深夜_休日:切り捨て
+                oneday_payroll_over_60_hour =
+                  Math.floor(oneday_payroll_over_60_hour / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //C': 日中_残業60時間以上:切り捨て
+                oneday_payroll_midnight_over_60_hour =
+                  Math.floor(
+                    oneday_payroll_midnight_over_60_hour / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り捨て
                 //カスタム集計
                 custom_onday_payroll.forEach(function (_, c_o_p_i) {
                   custom_onday_payroll[c_o_p_i]["agg_result"] =
@@ -2068,8 +2287,18 @@ export const calculateTotalResultData =
         line_work_time - line_shift_time,
         0
       ); //値がマイナスになってしまう場合は0にしておく//残業時間(勤務時間-シフト合計)
+
+      //C'': 日中_残業60時間以内
+      oneday_payroll_over_inner_60_hour = oneday_payroll_over - oneday_payroll_over_60_hour;
+      //D'': 深夜_残業60時間以内
+      oneday_payroll_midnight_over_inner_60_hour = oneday_payroll_midnight_over - oneday_payroll_midnight_over_60_hour;
+
       let line_legal_over_time =
         oneday_payroll_over + oneday_payroll_midnight_over; //法定外残業時間(C+D)
+      let line_legal_over_inner_60_hour_time =
+        oneday_payroll_over_inner_60_hour + oneday_payroll_midnight_over_inner_60_hour; //法定外残業時間(C+D)_60時間以内
+      let line_legal_over_60_hour_time =
+        oneday_payroll_over_60_hour + oneday_payroll_midnight_over_60_hour; //法定外残業時間(C+D)_60時間以上
       let line_deep_night_time =
         oneday_payroll_midnight_nomal +
         oneday_payroll_midnight_over +
@@ -2171,6 +2400,16 @@ export const calculateTotalResultData =
           ("0" + (Number(oneday_payroll_midnight_over) % 60)).slice(-2) +
           ","; //深夜_残業(D)
         csv_body_str +=
+          Math.floor(Number(oneday_payroll_over_60_hour) / 60) +
+          ":" +
+          ("0" + (Number(oneday_payroll_over_60_hour) % 60)).slice(-2) +
+          ","; //日中_残業60時間以上(C')
+        csv_body_str +=
+          Math.floor(Number(oneday_payroll_midnight_over_60_hour) / 60) +
+          ":" +
+          ("0" + (Number(oneday_payroll_midnight_over_60_hour) % 60)).slice(-2) +
+          ","; //深夜_残業60時間以上(D')
+        csv_body_str +=
           Math.floor(Number(oneday_payroll_holiday) / 60) +
           ":" +
           ("0" + (Number(oneday_payroll_holiday) % 60)).slice(-2) +
@@ -2191,6 +2430,16 @@ export const calculateTotalResultData =
           ":" +
           ("0" + (Number(line_legal_over_time) % 60)).slice(-2) +
           ","; //法定外残業(C+D)
+        csv_body_str +=
+          Math.floor(Number(line_legal_over_inner_60_hour_time) / 60) +
+          ":" +
+          ("0" + (Number(line_legal_over_inner_60_hour_time) % 60)).slice(-2) +
+          ","; //法定外残業(C+D)_60時間以内
+        csv_body_str +=
+          Math.floor(Number(line_legal_over_60_hour_time) / 60) +
+          ":" +
+          ("0" + (Number(line_legal_over_60_hour_time) % 60)).slice(-2) +
+          ","; //法定外残業(C+D)_60時間以上
         csv_body_str +=
           Math.floor(Number(line_deep_night_time) / 60) +
           ":" +
@@ -2357,6 +2606,8 @@ export const calculateTotalResultData =
         over_time: line_over_time, //シフト外残業時間(分)
         legal_inner_over_time: line_legal_inner_over_time, //法定内残業時間(分)
         legal_over_time: line_legal_over_time, //法定外残業時間(C+D)
+        legal_over_inner_60_hour_time: line_legal_over_inner_60_hour_time, //法定外残業時間(C+D)_60時間以内
+        legal_over_60_hour_time: line_legal_over_60_hour_time, //法定外残業時間(C+D)_60時間以上
         deep_night_time: line_deep_night_time, //深夜労働(B+D+F)
         holiday_work_time: line_holiday_work_time, //休日労働(E+F)
         absence_time: line_absence_time, //全日欠勤
@@ -2375,12 +2626,17 @@ export const calculateTotalResultData =
         //給与計算用項目(分)
         normal_work_limit: obj["normal_work_limit"], //法定内労働の上限
         payroll_type_breakdown: oneday_payroll_type_breakdown, //グラフ表示用時刻内わけ
+        payroll_over_60_hour_breakdown: oneday_payroll_over_60_hour_breakdown, //グラフ表示用残業60時間以上時刻内わけ
         payroll_nomal: oneday_payroll_nomal, //日中_通常(A)
         payroll_midnight_nomal: oneday_payroll_midnight_nomal, //深夜_通常(B)
         payroll_over: oneday_payroll_over, //日中_残業(C)
         payroll_midnight_over: oneday_payroll_midnight_over, //深夜_残業(D)
         payroll_holiday: oneday_payroll_holiday, //日中_休日(E)
         payroll_midnight_holiday: oneday_payroll_midnight_holiday, //深夜_休日(F)
+        payroll_over_60_hour: oneday_payroll_over_60_hour, //日中_残業60時間以上(C')
+        payroll_midnight_over_60_hour: oneday_payroll_midnight_over_60_hour, //深夜_残業60時間以上(D')
+        payroll_over_inner_60_hour: oneday_payroll_over_inner_60_hour, //日中_残業60時間以内(C'')
+        payroll_midnight_over_inner_60_hour: oneday_payroll_midnight_over_inner_60_hour, //深夜_残業60時間以内(D'')
 
         ////////////////////////
         //分数単位
@@ -2554,8 +2810,14 @@ export const calculateTotalResultData =
                 Number(rounding_option[0]); //E: 日中_休日:四捨五入
               payroll_midnight_holiday =
                 Math.round(
-                  payroll_midnight_holiday / Number(rounding_option[0])
+              payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:四捨五入
+              payroll_over_60_hour =
+                Math.round(payroll_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //C': 日中_残業60時間以上:四捨五入
+              payroll_midnight_over_60_hour =
+                Math.round(payroll_midnight_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //D': 深夜_残業60時間以上:四捨五入
               //カスタム集計
               custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
@@ -2633,6 +2895,12 @@ export const calculateTotalResultData =
                 Math.ceil(
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:切り上げ
+              payroll_over_60_hour =
+                Math.ceil(payroll_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //C': 日中_残業60時間以上:切り上げ
+              payroll_midnight_over_60_hour =
+                Math.ceil(payroll_midnight_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り上げ
               //カスタム集計
               custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
@@ -2711,6 +2979,12 @@ export const calculateTotalResultData =
                 Math.floor(
                   payroll_midnight_holiday / Number(rounding_option[0])
                 ) * Number(rounding_option[0]); //F: 深夜_休日:切り捨て
+              payroll_over_60_hour =
+                Math.floor(payroll_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //C': 日中_残業60時間以上:切り捨て
+              payroll_midnight_over_60_hour =
+                Math.floor(payroll_midnight_over_60_hour / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //D': 深夜_残業60時間以上:切り捨て
               //カスタム集計
               custom_payroll.forEach(function (_, c_o_p_i) {
                 custom_payroll[c_o_p_i]["agg_result"] =
@@ -2744,8 +3018,18 @@ export const calculateTotalResultData =
       payroll_midnight_over +
       payroll_holiday +
       payroll_midnight_holiday;
+    
+    //C'': 日中_残業60時間以内
+    payroll_over_inner_60_hour = payroll_over - payroll_over_60_hour;
+    //D'': 深夜_残業60時間以内
+    payroll_midnight_over_inner_60_hour = payroll_midnight_over - payroll_midnight_over_60_hour;
+      
     //法定外残業時間(C+D)
     legal_works.over = payroll_over + payroll_midnight_over;
+    //法定外残業時間(C+D)_60時間以内
+    legal_works_over_inner_60_hour = payroll_over_inner_60_hour + payroll_midnight_over_inner_60_hour;
+    //法定外残業時間(C+D)_60時間以上
+    legal_works_over_60_hour = payroll_over_60_hour + payroll_midnight_over_60_hour;
     //深夜労働(B+D+F)
     pro_late_night_work_time =
       payroll_midnight_nomal + payroll_midnight_over + payroll_midnight_holiday;
@@ -2909,6 +3193,18 @@ export const calculateTotalResultData =
           ("0" + (payroll_midnight_over % 60)).slice(-2)) +
         "\n";
       csv_header_str +=
+        "日中_残業60h以上(C')," +
+        (Math.floor(payroll_over_60_hour / 60) +
+          ":" +
+          ("0" + (payroll_over_60_hour % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "深夜_残業60h以上(D')," +
+        (Math.floor(payroll_midnight_over_60_hour / 60) +
+          ":" +
+          ("0" + (payroll_midnight_over_60_hour % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
         "日中_休日(E)," +
         (Math.floor(payroll_holiday / 60) +
           ":" +
@@ -2992,6 +3288,18 @@ export const calculateTotalResultData =
         (Math.floor(legal_works.over / 60) +
           ":" +
           ("0" + (legal_works.over % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "法定外残業(60時間以内)," +
+        (Math.floor(legal_works_over_inner_60_hour / 60) +
+          ":" +
+          ("0" + (legal_works_over_inner_60_hour % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "法定外残業(60時間以上)," +
+        (Math.floor(legal_works_over_60_hour / 60) +
+          ":" +
+          ("0" + (legal_works_over_60_hour % 60)).slice(-2)) +
         "\n";
       csv_header_str +=
         "深夜労働," +
@@ -3331,6 +3639,7 @@ export const calculateTotalResultData =
       minute_format_type: "h",
       Q_format_type: "d",
       agg_display_type: "A_F",
+      C_D_display_type: "total", //合計:total, 分割:breakdown
 
       //集計期間
       start_date: start_date, //集計開始日
@@ -3354,6 +3663,10 @@ export const calculateTotalResultData =
       payroll_midnight_over: payroll_midnight_over, //D: 深夜_残業
       payroll_holiday: payroll_holiday, //E: 日中_休日
       payroll_midnight_holiday: payroll_midnight_holiday, //F: 深夜_休日
+      payroll_over_60_hour: payroll_over_60_hour, //C': 日中_残業60時間以上
+      payroll_midnight_over_60_hour: payroll_midnight_over_60_hour, //D': 深夜_残業60時間以上
+      payroll_over_inner_60_hour: payroll_over_inner_60_hour, //C'': 日中_残業60時間以内
+      payroll_midnight_over_inner_60_hour: payroll_midnight_over_inner_60_hour, //D'': 深夜_残業60時間以内
 
       pro_custom_payroll: custom_payroll, //カスタム集計(時給時間帯)
       custom_payroll_time: custom_payroll_time, //企業ごとカスタム集計_合計時間
@@ -3380,6 +3693,8 @@ export const calculateTotalResultData =
       pro_shift_over_work_time: pro_shift_over_work_time, //残業時間(勤務時間-シフト合計)
       works_over: works.over, //シフト外残業
       legal_works_over: legal_works.over, //法定外残業(C+D)
+      legal_works_over_inner_60_hour: legal_works_over_inner_60_hour, //法定外残業(C+D)_60時間以内
+      legal_works_over_60_hour: legal_works_over_60_hour, //法定外残業(C+D)_60時間以上
       pro_late_night_work_time: pro_late_night_work_time, //深夜労働(B+D+F)
       pro_holiday_work_time: pro_holiday_work_time, //休日労働(E+F)
       pro_absence_time: pro_absence_time, //全日欠勤
