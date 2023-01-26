@@ -76,6 +76,8 @@ export const calculateTotalResultData =
     let works = { over: 0 }; //シフト外残業(退勤シフト時刻以降の時間帯の勤務時間を集計)
     let pro_legal_inner_works_over = 0; //法定内残業
     let legal_works = { over: 0 }; //法定外残業(C+D)
+    let legal_works_over_inner_60_hour = 0; //法定外残業(C+D)_60時間以内
+    let legal_works_over_60_hour = 0; //法定外残業(C+D)_60時間以上
     let pro_late_night_work_time = 0; //深夜労働(B+D+F)
     let pro_holiday_work_time = 0; //休日労働(E+F)
     let pro_absence_time = 0; //全日欠勤時間
@@ -181,7 +183,7 @@ export const calculateTotalResultData =
       csv_body_str +=
         ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_残業60h以上(C'),深夜_残業60h以上(D'),日中_休日(E),深夜_休日(F)";
       csv_body_str +=
-        ",法定内残業,法定外残業,深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
+        ",法定内残業,法定外残業,法定外残業(60時間以内),法定外残業(60時間以上),深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
 
       custom_payroll.forEach(function (c_p_obj) {
         //時給時間帯項目追加
@@ -2293,6 +2295,10 @@ export const calculateTotalResultData =
 
       let line_legal_over_time =
         oneday_payroll_over + oneday_payroll_midnight_over; //法定外残業時間(C+D)
+      let line_legal_over_inner_60_hour_time =
+        oneday_payroll_over_inner_60_hour + oneday_payroll_midnight_over_inner_60_hour; //法定外残業時間(C+D)_60時間以内
+      let line_legal_over_60_hour_time =
+        oneday_payroll_over_60_hour + oneday_payroll_midnight_over_60_hour; //法定外残業時間(C+D)_60時間以上
       let line_deep_night_time =
         oneday_payroll_midnight_nomal +
         oneday_payroll_midnight_over +
@@ -2424,6 +2430,16 @@ export const calculateTotalResultData =
           ":" +
           ("0" + (Number(line_legal_over_time) % 60)).slice(-2) +
           ","; //法定外残業(C+D)
+        csv_body_str +=
+          Math.floor(Number(line_legal_over_inner_60_hour_time) / 60) +
+          ":" +
+          ("0" + (Number(line_legal_over_inner_60_hour_time) % 60)).slice(-2) +
+          ","; //法定外残業(C+D)_60時間以内
+        csv_body_str +=
+          Math.floor(Number(line_legal_over_60_hour_time) / 60) +
+          ":" +
+          ("0" + (Number(line_legal_over_60_hour_time) % 60)).slice(-2) +
+          ","; //法定外残業(C+D)_60時間以上
         csv_body_str +=
           Math.floor(Number(line_deep_night_time) / 60) +
           ":" +
@@ -2590,6 +2606,8 @@ export const calculateTotalResultData =
         over_time: line_over_time, //シフト外残業時間(分)
         legal_inner_over_time: line_legal_inner_over_time, //法定内残業時間(分)
         legal_over_time: line_legal_over_time, //法定外残業時間(C+D)
+        legal_over_inner_60_hour_time: line_legal_over_inner_60_hour_time, //法定外残業時間(C+D)_60時間以内
+        legal_over_60_hour_time: line_legal_over_60_hour_time, //法定外残業時間(C+D)_60時間以上
         deep_night_time: line_deep_night_time, //深夜労働(B+D+F)
         holiday_work_time: line_holiday_work_time, //休日労働(E+F)
         absence_time: line_absence_time, //全日欠勤
@@ -3008,6 +3026,10 @@ export const calculateTotalResultData =
       
     //法定外残業時間(C+D)
     legal_works.over = payroll_over + payroll_midnight_over;
+    //法定外残業時間(C+D)_60時間以内
+    legal_works_over_inner_60_hour = payroll_over_inner_60_hour + payroll_midnight_over_inner_60_hour;
+    //法定外残業時間(C+D)_60時間以上
+    legal_works_over_60_hour = payroll_over_60_hour + payroll_midnight_over_60_hour;
     //深夜労働(B+D+F)
     pro_late_night_work_time =
       payroll_midnight_nomal + payroll_midnight_over + payroll_midnight_holiday;
@@ -3266,6 +3288,18 @@ export const calculateTotalResultData =
         (Math.floor(legal_works.over / 60) +
           ":" +
           ("0" + (legal_works.over % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "法定外残業(60時間以内)," +
+        (Math.floor(legal_works_over_inner_60_hour / 60) +
+          ":" +
+          ("0" + (legal_works_over_inner_60_hour % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "法定外残業(60時間以上)," +
+        (Math.floor(legal_works_over_60_hour / 60) +
+          ":" +
+          ("0" + (legal_works_over_60_hour % 60)).slice(-2)) +
         "\n";
       csv_header_str +=
         "深夜労働," +
@@ -3659,6 +3693,8 @@ export const calculateTotalResultData =
       pro_shift_over_work_time: pro_shift_over_work_time, //残業時間(勤務時間-シフト合計)
       works_over: works.over, //シフト外残業
       legal_works_over: legal_works.over, //法定外残業(C+D)
+      legal_works_over_inner_60_hour: legal_works_over_inner_60_hour, //法定外残業(C+D)_60時間以内
+      legal_works_over_60_hour: legal_works_over_60_hour, //法定外残業(C+D)_60時間以上
       pro_late_night_work_time: pro_late_night_work_time, //深夜労働(B+D+F)
       pro_holiday_work_time: pro_holiday_work_time, //休日労働(E+F)
       pro_absence_time: pro_absence_time, //全日欠勤
