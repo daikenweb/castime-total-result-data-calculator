@@ -3605,6 +3605,7 @@ export const calculateTotalResultData =
       minute_format_type: "h",
       Q_format_type: "d",
       agg_display_type: "A_F",
+      C_D_display_type: "total", //合計:total, 分割:breakdown
 
       //集計期間
       start_date: start_date, //集計開始日
