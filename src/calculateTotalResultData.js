@@ -85,6 +85,8 @@ export const calculateTotalResultData =
     let pro_late_fast_time = 0; //遅刻早退
     let pro_late_start_time = 0; //遅刻
     let pro_fast_end_time = 0; //早退
+    let pro_late_start_omit_break_time = 0; //遅刻_休憩シフトを引く
+    let pro_fast_end_omit_break_time = 0; //早退_休憩シフトを引く
     let pro_before_over_work_time = 0; //前残業
 
     let pro_normal_holiday_work_time = 0; //所定休日労働
@@ -1549,6 +1551,8 @@ export const calculateTotalResultData =
       let line_late_fast_time = 0; //遅刻早退
       let line_late_start_time = 0; //遅刻
       let line_fast_end_time = 0; //早退
+      let line_late_start_omit_break_time = 0; //遅刻_休憩シフトを引く
+      let line_fast_end_omit_break_time = 0; //早退_休憩シフトを引く
       let line_before_over_work_time = 0; //前残業
 
       let line_normal_holiday_work_time = 0; //所定休日労働
@@ -1734,6 +1738,26 @@ export const calculateTotalResultData =
             ),
             0
           ); //値がマイナスになってしまう場合は0にしておく
+
+          //休憩シフトを省いた遅刻集計
+          line_late_start_omit_break_time = line_late_start_time;
+          if(moment(obj["plan_start"]) < moment(obj["result_start"])){
+            for(let planBreakObj  of obj["data"]["plan_breaktime"]){
+              //console.log("休憩シフト",planBreakObj);
+              if( (moment(obj["plan_start"]) <= moment(planBreakObj["start"])) && (moment(planBreakObj["end"]) <= moment(obj["result_start"])) ){
+                //console.log("休憩全て除外");
+                line_late_start_omit_break_time = line_late_start_omit_break_time - planBreakObj["total_time"];
+              } else if( (moment(obj["plan_start"]) <= moment(planBreakObj["start"])) && (moment(obj["result_start"]) <= moment(planBreakObj["end"])) ){
+                //console.log("休憩一部除外");
+                line_late_start_omit_break_time = 
+                line_late_start_omit_break_time 
+                - Math.floor(
+                  (moment(obj["result_start"]) - moment(planBreakObj["start"])) / 60 / 1000
+                );
+              }
+            }
+
+          }
         }
       }
       if (obj["bad_end"] == 1) {
@@ -1744,6 +1768,26 @@ export const calculateTotalResultData =
             ),
             0
           ); //値がマイナスになってしまう場合は0にしておく
+
+          //休憩シフトを省いた早退集計
+          line_fast_end_omit_break_time = line_fast_end_time;
+          if(moment(obj["result_end"]) < moment(obj["plan_end"])){
+            for(let planBreakObj  of obj["data"]["plan_breaktime"]){
+              //console.log("休憩シフト",planBreakObj);
+              if( (moment(obj["result_end"]) <= moment(planBreakObj["start"])) && (moment(planBreakObj["end"]) <= moment(obj["plan_end"])) ){
+                //console.log("休憩全て除外");
+                line_fast_end_omit_break_time = line_fast_end_omit_break_time - planBreakObj["total_time"];
+              } else if( (moment(planBreakObj["start"]) <= moment(obj["result_end"])) && (moment(planBreakObj["end"]) <= moment(obj["plan_end"])) ){
+                //console.log("休憩一部除外");
+                line_fast_end_omit_break_time = 
+                line_fast_end_omit_break_time
+                - Math.floor(
+                  (moment(planBreakObj["end"]) - moment(obj["result_end"])) / 60 / 1000
+                );
+              }
+            }
+
+          }
         }
       }
 
@@ -2234,6 +2278,8 @@ export const calculateTotalResultData =
       pro_absence_not_all_day_time += line_absence_not_all_day_time; //欠勤
       pro_late_start_time += line_late_start_time; //遅刻
       pro_fast_end_time += line_fast_end_time; //早退
+      pro_late_start_omit_break_time += line_late_start_omit_break_time; //遅刻_休憩シフトを引く
+      pro_fast_end_omit_break_time += line_fast_end_omit_break_time; //早退_休憩シフトを引く
       pro_before_over_work_time += line_before_over_work_time; //前残業
       //console.log(obj["date"] + " 合計前残業",pro_before_over_work_time);
       pro_normal_holiday_work_time += line_normal_holiday_work_time; //所定休日労働
@@ -2615,6 +2661,8 @@ export const calculateTotalResultData =
         late_start_time: line_late_start_time, //遅刻
         fast_end_time: line_fast_end_time, //早退
         late_fast_time: line_late_fast_time, //遅刻早退
+        late_start_omit_break_time: line_late_start_omit_break_time, //遅刻_休憩シフトを引く
+        fast_end_omit_break_time: line_fast_end_omit_break_time, //早退_休憩シフトを引く
         before_over_work_time: line_before_over_work_time, //前残業
         normal_holiday_work_time: line_normal_holiday_work_time, //所定休日労働
         actual_work_time: line_actual_work_time, //打刻時間
@@ -3702,6 +3750,8 @@ export const calculateTotalResultData =
       pro_late_fast_time: pro_late_fast_time, //遅刻早退
       pro_late_start_time: pro_late_start_time, //遅刻
       pro_fast_end_time: pro_fast_end_time, //早退
+      pro_late_start_omit_break_time: pro_late_start_omit_break_time, //遅刻_休憩シフトを引く
+      pro_fast_end_omit_break_time: pro_fast_end_omit_break_time, //早退_休憩シフトを引く
       pro_before_over_work_time: pro_before_over_work_time, //前残業
       pro_legal_inner_works_over: pro_legal_inner_works_over, //法定内残業
       pro_normal_holiday_work_time: pro_normal_holiday_work_time, //所定休日労働
