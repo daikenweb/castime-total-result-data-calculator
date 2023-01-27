@@ -1747,7 +1747,7 @@ export const calculateTotalResultData =
               if( (moment(obj["plan_start"]) <= moment(planBreakObj["start"])) && (moment(planBreakObj["end"]) <= moment(obj["result_start"])) ){
                 //console.log("休憩全て除外");
                 line_late_start_omit_break_time = line_late_start_omit_break_time - planBreakObj["total_time"];
-              } else if( (moment(obj["plan_start"]) <= moment(planBreakObj["start"])) && (moment(obj["result_start"]) <= moment(planBreakObj["end"])) ){
+              } else if( (moment(obj["plan_start"]) < moment(planBreakObj["start"])) && (moment(planBreakObj["start"]) < moment(obj["result_start"])) && (moment(obj["result_start"]) < moment(planBreakObj["end"])) ){
                 //console.log("休憩一部除外");
                 line_late_start_omit_break_time = 
                 line_late_start_omit_break_time 
@@ -1777,7 +1777,7 @@ export const calculateTotalResultData =
               if( (moment(obj["result_end"]) <= moment(planBreakObj["start"])) && (moment(planBreakObj["end"]) <= moment(obj["plan_end"])) ){
                 //console.log("休憩全て除外");
                 line_fast_end_omit_break_time = line_fast_end_omit_break_time - planBreakObj["total_time"];
-              } else if( (moment(planBreakObj["start"]) <= moment(obj["result_end"])) && (moment(planBreakObj["end"]) <= moment(obj["plan_end"])) ){
+              } else if( (moment(planBreakObj["start"]) < moment(obj["result_end"])) && (moment(obj["result_end"]) < moment(planBreakObj["end"])) && (moment(planBreakObj["end"]) < moment(obj["plan_end"])) ){
                 //console.log("休憩一部除外");
                 line_fast_end_omit_break_time = 
                 line_fast_end_omit_break_time
