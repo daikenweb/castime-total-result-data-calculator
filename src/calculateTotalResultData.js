@@ -185,7 +185,7 @@ export const calculateTotalResultData =
       csv_body_str +=
         ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_残業60h以上(C'),深夜_残業60h以上(D'),日中_休日(E),深夜_休日(F)";
       csv_body_str +=
-        ",法定内残業,法定外残業,法定外残業(60時間以内),法定外残業(60時間以上),深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
+        ",法定内残業,法定外残業,法定外残業(60時間以内),法定外残業(60時間以上),深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,遅刻(休憩シフト除外),早退(休憩シフト除外),打刻時間";
 
       custom_payroll.forEach(function (c_p_obj) {
         //時給時間帯項目追加
@@ -2522,6 +2522,16 @@ export const calculateTotalResultData =
           ("0" + (Number(line_fast_end_time) % 60)).slice(-2) +
           ","; //早退
         csv_body_str +=
+          Math.floor(Number(line_late_start_omit_break_time) / 60) +
+          ":" +
+          ("0" + (Number(line_late_start_omit_break_time) % 60)).slice(-2) +
+          ","; //遅刻(休憩シフト考慮)
+        csv_body_str +=
+          Math.floor(Number(line_fast_end_omit_break_time) / 60) +
+          ":" +
+          ("0" + (Number(line_fast_end_omit_break_time) % 60)).slice(-2) +
+          ","; //早退(休憩シフト考慮)
+        csv_body_str +=
           Math.floor(Number(line_actual_work_time) / 60) +
           ":" +
           ("0" + (Number(line_actual_work_time) % 60)).slice(-2) +
@@ -3391,7 +3401,19 @@ export const calculateTotalResultData =
           ":" +
           ("0" + (pro_fast_end_time % 60)).slice(-2)) +
         "\n";
-        csv_header_str +=
+      csv_header_str +=
+        "遅刻(休憩シフト除外)," +
+        (Math.floor(pro_late_start_omit_break_time / 60) +
+          ":" +
+          ("0" + (pro_late_start_omit_break_time % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "早退(休憩シフト除外)," +
+        (Math.floor(pro_fast_end_omit_break_time / 60) +
+          ":" +
+          ("0" + (pro_fast_end_omit_break_time % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
         "打刻時間," +
         (Math.floor(pro_actual_work_time / 60) +
           ":" +
