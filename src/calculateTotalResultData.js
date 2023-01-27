@@ -1952,6 +1952,13 @@ export const calculateTotalResultData =
                 line_fast_end_time =
                   Math.round(line_fast_end_time / Number(rounding_option[0])) *
                   Number(rounding_option[0]); //早退:四捨五入
+                line_late_start_omit_break_time =
+                  Math.round(
+                    line_late_start_omit_break_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //遅刻(休憩シフト除外):四捨五入
+                line_fast_end_omit_break_time =
+                  Math.round(line_fast_end_omit_break_time / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //早退(休憩シフト除外):四捨五入
                 line_before_over_work_time =
                   Math.round(
                     line_before_over_work_time / Number(rounding_option[0])
@@ -2062,6 +2069,13 @@ export const calculateTotalResultData =
                 line_fast_end_time =
                   Math.ceil(line_fast_end_time / Number(rounding_option[0])) *
                   Number(rounding_option[0]); //早退:切り上げ
+                line_late_start_omit_break_time =
+                  Math.ceil(
+                    line_late_start_omit_break_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //遅刻(休憩シフト除外):切り上げ
+                line_fast_end_omit_break_time =
+                  Math.ceil(line_fast_end_omit_break_time / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //早退(休憩シフト除外):切り上げ
                 line_before_over_work_time =
                   Math.ceil(
                     line_before_over_work_time / Number(rounding_option[0])
@@ -2172,6 +2186,13 @@ export const calculateTotalResultData =
                 line_fast_end_time =
                   Math.floor(line_fast_end_time / Number(rounding_option[0])) *
                   Number(rounding_option[0]); //早退:切り捨て
+                line_late_start_omit_break_time =
+                  Math.floor(
+                    line_late_start_omit_break_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //遅刻(休憩シフト除外):切り捨て
+                line_fast_end_omit_break_time =
+                  Math.floor(line_fast_end_omit_break_time / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //早退(休憩シフト除外):切り捨て
                 line_before_over_work_time =
                   Math.floor(
                     line_before_over_work_time / Number(rounding_option[0])
