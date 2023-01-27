@@ -3733,7 +3733,13 @@ export const calculateTotalResultData =
       );
     }
 
+    const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
+    const version = "v20230127";
+
     let res_data = {
+      version: version, //集計処理のバージョン
+      aggregate_date: aggregate_date, //集計日
+
       //基本情報
       target_month: target_month, //対象月
       user_name: res["user_name"], //社員名
