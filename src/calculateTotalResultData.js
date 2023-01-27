@@ -2837,6 +2837,12 @@ export const calculateTotalResultData =
               pro_fast_end_time =
                 Math.round(pro_fast_end_time / Number(rounding_option[0])) *
                 Number(rounding_option[0]); //早退:四捨五入
+              pro_late_start_omit_break_time =
+                Math.round(pro_late_start_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //遅刻(休憩シフト除外):四捨五入
+              pro_fast_end_omit_break_time =
+                Math.round(pro_fast_end_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //早退(休憩シフト除外):四捨五入
               pro_before_over_work_time =
                 Math.round(
                   pro_before_over_work_time / Number(rounding_option[0])
@@ -2921,6 +2927,12 @@ export const calculateTotalResultData =
               pro_fast_end_time =
                 Math.ceil(pro_fast_end_time / Number(rounding_option[0])) *
                 Number(rounding_option[0]); //早退:切り上げ
+              pro_late_start_omit_break_time =
+                Math.ceil(pro_late_start_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //遅刻(休憩シフト除外):切り上げ
+              pro_fast_end_omit_break_time =
+                Math.ceil(pro_fast_end_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //早退(休憩シフト除外):切り上げ
               pro_before_over_work_time =
                 Math.ceil(
                   pro_before_over_work_time / Number(rounding_option[0])
@@ -3004,6 +3016,12 @@ export const calculateTotalResultData =
               pro_fast_end_time =
                 Math.floor(pro_fast_end_time / Number(rounding_option[0])) *
                 Number(rounding_option[0]); //早退:切り捨て
+              pro_late_start_omit_break_time =
+                Math.floor(pro_late_start_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //遅刻(休憩シフト除外):切り捨て
+              pro_fast_end_omit_break_time =
+                Math.floor(pro_fast_end_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //早退(休憩シフト除外):切り捨て
               pro_before_over_work_time =
                 Math.floor(
                   pro_before_over_work_time / Number(rounding_option[0])
