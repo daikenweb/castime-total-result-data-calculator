@@ -85,6 +85,8 @@ export const calculateTotalResultData =
     let pro_late_fast_time = 0; //遅刻早退
     let pro_late_start_time = 0; //遅刻
     let pro_fast_end_time = 0; //早退
+    let pro_late_start_omit_break_time = 0; //遅刻_休憩シフトを引く
+    let pro_fast_end_omit_break_time = 0; //早退_休憩シフトを引く
     let pro_before_over_work_time = 0; //前残業
 
     let pro_normal_holiday_work_time = 0; //所定休日労働
@@ -183,7 +185,7 @@ export const calculateTotalResultData =
       csv_body_str +=
         ",日中_通常(A),深夜_通常(B),日中_残業(C),深夜_残業(D),日中_残業60h以上(C'),深夜_残業60h以上(D'),日中_休日(E),深夜_休日(F)";
       csv_body_str +=
-        ",法定内残業,法定外残業,法定外残業(60時間以内),法定外残業(60時間以上),深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,打刻時間";
+        ",法定内残業,法定外残業,法定外残業(60時間以内),法定外残業(60時間以上),深夜労働,休日労働,所定休日労働,全日欠勤,欠勤,遅刻,早退,遅刻(休憩シフト除外),早退(休憩シフト除外),打刻時間";
 
       custom_payroll.forEach(function (c_p_obj) {
         //時給時間帯項目追加
@@ -1549,6 +1551,8 @@ export const calculateTotalResultData =
       let line_late_fast_time = 0; //遅刻早退
       let line_late_start_time = 0; //遅刻
       let line_fast_end_time = 0; //早退
+      let line_late_start_omit_break_time = 0; //遅刻_休憩シフトを引く
+      let line_fast_end_omit_break_time = 0; //早退_休憩シフトを引く
       let line_before_over_work_time = 0; //前残業
 
       let line_normal_holiday_work_time = 0; //所定休日労働
@@ -1734,6 +1738,26 @@ export const calculateTotalResultData =
             ),
             0
           ); //値がマイナスになってしまう場合は0にしておく
+
+          //休憩シフトを省いた遅刻集計
+          line_late_start_omit_break_time = line_late_start_time;
+          if(moment(obj["plan_start"]) < moment(obj["result_start"])){
+            for(let planBreakObj  of obj["data"]["plan_breaktime"]){
+              //console.log("休憩シフト",planBreakObj);
+              if( (moment(obj["plan_start"]) <= moment(planBreakObj["start"])) && (moment(planBreakObj["end"]) <= moment(obj["result_start"])) ){
+                //console.log("休憩全て除外");
+                line_late_start_omit_break_time = line_late_start_omit_break_time - planBreakObj["total_time"];
+              } else if( (moment(obj["plan_start"]) < moment(planBreakObj["start"])) && (moment(planBreakObj["start"]) < moment(obj["result_start"])) && (moment(obj["result_start"]) < moment(planBreakObj["end"])) ){
+                //console.log("休憩一部除外");
+                line_late_start_omit_break_time = 
+                line_late_start_omit_break_time 
+                - Math.floor(
+                  (moment(obj["result_start"]) - moment(planBreakObj["start"])) / 60 / 1000
+                );
+              }
+            }
+
+          }
         }
       }
       if (obj["bad_end"] == 1) {
@@ -1744,6 +1768,26 @@ export const calculateTotalResultData =
             ),
             0
           ); //値がマイナスになってしまう場合は0にしておく
+
+          //休憩シフトを省いた早退集計
+          line_fast_end_omit_break_time = line_fast_end_time;
+          if(moment(obj["result_end"]) < moment(obj["plan_end"])){
+            for(let planBreakObj  of obj["data"]["plan_breaktime"]){
+              //console.log("休憩シフト",planBreakObj);
+              if( (moment(obj["result_end"]) <= moment(planBreakObj["start"])) && (moment(planBreakObj["end"]) <= moment(obj["plan_end"])) ){
+                //console.log("休憩全て除外");
+                line_fast_end_omit_break_time = line_fast_end_omit_break_time - planBreakObj["total_time"];
+              } else if( (moment(planBreakObj["start"]) < moment(obj["result_end"])) && (moment(obj["result_end"]) < moment(planBreakObj["end"])) && (moment(planBreakObj["end"]) < moment(obj["plan_end"])) ){
+                //console.log("休憩一部除外");
+                line_fast_end_omit_break_time = 
+                line_fast_end_omit_break_time
+                - Math.floor(
+                  (moment(planBreakObj["end"]) - moment(obj["result_end"])) / 60 / 1000
+                );
+              }
+            }
+
+          }
         }
       }
 
@@ -1908,6 +1952,13 @@ export const calculateTotalResultData =
                 line_fast_end_time =
                   Math.round(line_fast_end_time / Number(rounding_option[0])) *
                   Number(rounding_option[0]); //早退:四捨五入
+                line_late_start_omit_break_time =
+                  Math.round(
+                    line_late_start_omit_break_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //遅刻(休憩シフト除外):四捨五入
+                line_fast_end_omit_break_time =
+                  Math.round(line_fast_end_omit_break_time / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //早退(休憩シフト除外):四捨五入
                 line_before_over_work_time =
                   Math.round(
                     line_before_over_work_time / Number(rounding_option[0])
@@ -2018,6 +2069,13 @@ export const calculateTotalResultData =
                 line_fast_end_time =
                   Math.ceil(line_fast_end_time / Number(rounding_option[0])) *
                   Number(rounding_option[0]); //早退:切り上げ
+                line_late_start_omit_break_time =
+                  Math.ceil(
+                    line_late_start_omit_break_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //遅刻(休憩シフト除外):切り上げ
+                line_fast_end_omit_break_time =
+                  Math.ceil(line_fast_end_omit_break_time / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //早退(休憩シフト除外):切り上げ
                 line_before_over_work_time =
                   Math.ceil(
                     line_before_over_work_time / Number(rounding_option[0])
@@ -2128,6 +2186,13 @@ export const calculateTotalResultData =
                 line_fast_end_time =
                   Math.floor(line_fast_end_time / Number(rounding_option[0])) *
                   Number(rounding_option[0]); //早退:切り捨て
+                line_late_start_omit_break_time =
+                  Math.floor(
+                    line_late_start_omit_break_time / Number(rounding_option[0])
+                  ) * Number(rounding_option[0]); //遅刻(休憩シフト除外):切り捨て
+                line_fast_end_omit_break_time =
+                  Math.floor(line_fast_end_omit_break_time / Number(rounding_option[0])) *
+                  Number(rounding_option[0]); //早退(休憩シフト除外):切り捨て
                 line_before_over_work_time =
                   Math.floor(
                     line_before_over_work_time / Number(rounding_option[0])
@@ -2234,6 +2299,8 @@ export const calculateTotalResultData =
       pro_absence_not_all_day_time += line_absence_not_all_day_time; //欠勤
       pro_late_start_time += line_late_start_time; //遅刻
       pro_fast_end_time += line_fast_end_time; //早退
+      pro_late_start_omit_break_time += line_late_start_omit_break_time; //遅刻_休憩シフトを引く
+      pro_fast_end_omit_break_time += line_fast_end_omit_break_time; //早退_休憩シフトを引く
       pro_before_over_work_time += line_before_over_work_time; //前残業
       //console.log(obj["date"] + " 合計前残業",pro_before_over_work_time);
       pro_normal_holiday_work_time += line_normal_holiday_work_time; //所定休日労働
@@ -2476,6 +2543,16 @@ export const calculateTotalResultData =
           ("0" + (Number(line_fast_end_time) % 60)).slice(-2) +
           ","; //早退
         csv_body_str +=
+          Math.floor(Number(line_late_start_omit_break_time) / 60) +
+          ":" +
+          ("0" + (Number(line_late_start_omit_break_time) % 60)).slice(-2) +
+          ","; //遅刻(休憩シフト考慮)
+        csv_body_str +=
+          Math.floor(Number(line_fast_end_omit_break_time) / 60) +
+          ":" +
+          ("0" + (Number(line_fast_end_omit_break_time) % 60)).slice(-2) +
+          ","; //早退(休憩シフト考慮)
+        csv_body_str +=
           Math.floor(Number(line_actual_work_time) / 60) +
           ":" +
           ("0" + (Number(line_actual_work_time) % 60)).slice(-2) +
@@ -2615,6 +2692,8 @@ export const calculateTotalResultData =
         late_start_time: line_late_start_time, //遅刻
         fast_end_time: line_fast_end_time, //早退
         late_fast_time: line_late_fast_time, //遅刻早退
+        late_start_omit_break_time: line_late_start_omit_break_time, //遅刻_休憩シフトを引く
+        fast_end_omit_break_time: line_fast_end_omit_break_time, //早退_休憩シフトを引く
         before_over_work_time: line_before_over_work_time, //前残業
         normal_holiday_work_time: line_normal_holiday_work_time, //所定休日労働
         actual_work_time: line_actual_work_time, //打刻時間
@@ -2779,6 +2858,12 @@ export const calculateTotalResultData =
               pro_fast_end_time =
                 Math.round(pro_fast_end_time / Number(rounding_option[0])) *
                 Number(rounding_option[0]); //早退:四捨五入
+              pro_late_start_omit_break_time =
+                Math.round(pro_late_start_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //遅刻(休憩シフト除外):四捨五入
+              pro_fast_end_omit_break_time =
+                Math.round(pro_fast_end_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //早退(休憩シフト除外):四捨五入
               pro_before_over_work_time =
                 Math.round(
                   pro_before_over_work_time / Number(rounding_option[0])
@@ -2863,6 +2948,12 @@ export const calculateTotalResultData =
               pro_fast_end_time =
                 Math.ceil(pro_fast_end_time / Number(rounding_option[0])) *
                 Number(rounding_option[0]); //早退:切り上げ
+              pro_late_start_omit_break_time =
+                Math.ceil(pro_late_start_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //遅刻(休憩シフト除外):切り上げ
+              pro_fast_end_omit_break_time =
+                Math.ceil(pro_fast_end_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //早退(休憩シフト除外):切り上げ
               pro_before_over_work_time =
                 Math.ceil(
                   pro_before_over_work_time / Number(rounding_option[0])
@@ -2946,6 +3037,12 @@ export const calculateTotalResultData =
               pro_fast_end_time =
                 Math.floor(pro_fast_end_time / Number(rounding_option[0])) *
                 Number(rounding_option[0]); //早退:切り捨て
+              pro_late_start_omit_break_time =
+                Math.floor(pro_late_start_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //遅刻(休憩シフト除外):切り捨て
+              pro_fast_end_omit_break_time =
+                Math.floor(pro_fast_end_omit_break_time / Number(rounding_option[0])) *
+                Number(rounding_option[0]); //早退(休憩シフト除外):切り捨て
               pro_before_over_work_time =
                 Math.floor(
                   pro_before_over_work_time / Number(rounding_option[0])
@@ -3343,7 +3440,19 @@ export const calculateTotalResultData =
           ":" +
           ("0" + (pro_fast_end_time % 60)).slice(-2)) +
         "\n";
-        csv_header_str +=
+      csv_header_str +=
+        "遅刻(休憩シフト除外)," +
+        (Math.floor(pro_late_start_omit_break_time / 60) +
+          ":" +
+          ("0" + (pro_late_start_omit_break_time % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
+        "早退(休憩シフト除外)," +
+        (Math.floor(pro_fast_end_omit_break_time / 60) +
+          ":" +
+          ("0" + (pro_fast_end_omit_break_time % 60)).slice(-2)) +
+        "\n";
+      csv_header_str +=
         "打刻時間," +
         (Math.floor(pro_actual_work_time / 60) +
           ":" +
@@ -3702,6 +3811,8 @@ export const calculateTotalResultData =
       pro_late_fast_time: pro_late_fast_time, //遅刻早退
       pro_late_start_time: pro_late_start_time, //遅刻
       pro_fast_end_time: pro_fast_end_time, //早退
+      pro_late_start_omit_break_time: pro_late_start_omit_break_time, //遅刻_休憩シフトを引く
+      pro_fast_end_omit_break_time: pro_fast_end_omit_break_time, //早退_休憩シフトを引く
       pro_before_over_work_time: pro_before_over_work_time, //前残業
       pro_legal_inner_works_over: pro_legal_inner_works_over, //法定内残業
       pro_normal_holiday_work_time: pro_normal_holiday_work_time, //所定休日労働
