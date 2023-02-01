@@ -12,7 +12,7 @@ import { CUSTOM_AGG, Deep_Night_AGG, OUT_WORK_AGG } from "./internal/index";
  * const data = {
  *   start_date : moment('2019-04-21').format("YYYY-MM-DD"), //具体的な期間の開始日
  *   end_date : moment('2019-05-20').format("YYYY-MM-DD"),   //具体的な期間の最終日
- *   output_type : "PDF"                                     //CSV:CSV出力(ajaxでは使わずlib.jsで使用)　AGG_RESULT:集計結果取得(勤務実績画面表示用)
+ *   output_type : "AGG_RESULT"                                     //AGG_RESULT:集計結果取得(勤務実績画面表示用)
  * };
  *
  * const res = await calculateTotalResultData(data);
