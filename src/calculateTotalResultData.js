@@ -60,6 +60,7 @@ export const calculateTotalResultData =
     let pro_late_fast_number = 0; //遅刻・早退
     let pro_late_start_number = 0; //遅刻
     let pro_fast_end_number = 0; //早退
+    let pro_normal_holiday_work_number = 0; //所休出勤
     let pro_holiday_work_number = 0; //休日出勤
     let pro_vac_day_number = 0; //有休取得
     let pro_yuuQ_all_day_number = 0; //全日有給取得日
@@ -1560,6 +1561,9 @@ export const calculateTotalResultData =
       if (Number(obj["work_time"]) > 0) {
         pro_work_day_number++; //出勤数カウント(勤務時間の実績がある日をカウント)
       }
+      if (Number(obj["holiday_type"]) == 1 && Number(obj["work_time"]) > 0) {
+        pro_normal_holiday_work_number++; //休日出勤数カウント(所休で勤務時間がある日をカウント)
+      }
       if (Number(obj["holiday_type"]) == 2 && Number(obj["work_time"]) > 0) {
         pro_holiday_work_number++; //休日出勤数カウント(法休で勤務時間がある日をカウント)
       }
@@ -3025,6 +3029,7 @@ export const calculateTotalResultData =
       pro_late_fast_number: pro_late_fast_number, //遅刻早退
       pro_late_start_number: pro_late_start_number, //遅刻
       pro_fast_end_number: pro_fast_end_number, //早退
+      pro_normal_holiday_work_number: pro_normal_holiday_work_number, //所休出勤
       pro_holiday_work_number: pro_holiday_work_number, //休日出勤
       pro_vac_day_number: pro_vac_day_number, //有給取得
       pro_yuuQ_all_day_number: pro_yuuQ_all_day_number, //全日有給取得日
