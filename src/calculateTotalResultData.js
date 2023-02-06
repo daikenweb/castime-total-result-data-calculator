@@ -731,7 +731,14 @@ export const calculateTotalResultData =
             if (res["user_data"]["required_request"]["holiday_work"] == "1") {
               line_state = "未申請エラー";
             } else {
-              line_state = "休日出勤";
+              //line_state = "休日出勤";
+              if(Number(obj["holiday_type"]) == 1){
+                line_state = "所休出勤";
+              } else if(Number(obj["holiday_type"]) == 2){
+                line_state = "法休出勤";
+              } else {
+                line_state = "休日出勤";
+              }
             }
           } else {
             line_state = "所休";
@@ -751,7 +758,14 @@ export const calculateTotalResultData =
             line_state = "欠勤(休出)";
             state_error_flag = 1;
           } else {
-            line_state = "休日出勤";
+            //line_state = "休日出勤";
+            if(Number(obj["holiday_type"]) == 1){
+              line_state = "所休出勤";
+            } else if(Number(obj["holiday_type"]) == 2){
+              line_state = "法休出勤";
+            } else {
+              line_state = "休日出勤";
+            }
           }
         }
 
@@ -789,7 +803,14 @@ export const calculateTotalResultData =
             if (res["user_data"]["required_request"]["holiday_work"] == "1") {
               line_state = "未申請エラー";
             } else {
-              line_state = "休日出勤";
+              //line_state = "休日出勤";
+              if(Number(obj["holiday_type"]) == 1){
+                line_state = "所休出勤";
+              } else if(Number(obj["holiday_type"]) == 2){
+                line_state = "法休出勤";
+              } else {
+                line_state = "休日出勤";
+              }
             }
           } else {
             line_state = "法休";
@@ -809,7 +830,14 @@ export const calculateTotalResultData =
             line_state = "欠勤(休出)";
             state_error_flag = 1;
           } else {
-            line_state = "休日出勤";
+            //line_state = "休日出勤";
+            if(Number(obj["holiday_type"]) == 1){
+              line_state = "所休出勤";
+            } else if(Number(obj["holiday_type"]) == 2){
+              line_state = "法休出勤";
+            } else {
+              line_state = "休日出勤";
+            }
           }
         }
 
