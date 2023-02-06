@@ -80,7 +80,7 @@ export const calculateTotalResultData =
     let legal_works_over_inner_60_hour = 0; //法定外残業(C+D)_60時間以内
     let legal_works_over_60_hour = 0; //法定外残業(C+D)_60時間以上
     let pro_late_night_work_time = 0; //深夜労働(B+D+F)
-    let pro_holiday_work_time = 0; //休日労働(E+F)
+    let pro_holiday_work_time = 0; //法休労働(E+F)
     let pro_absence_time = 0; //全日欠勤時間
     let pro_absence_not_all_day_time = 0; //欠勤時間
     let pro_late_fast_time = 0; //遅刻早退
@@ -2349,7 +2349,7 @@ export const calculateTotalResultData =
         oneday_payroll_midnight_over +
         oneday_payroll_midnight_holiday; //深夜労働(B+D+F)
       let line_holiday_work_time =
-        oneday_payroll_holiday + oneday_payroll_midnight_holiday; //休日労働(E+F)
+        oneday_payroll_holiday + oneday_payroll_midnight_holiday; //法休労働(E+F)
 
       line_late_fast_time = line_late_start_time + line_fast_end_time; //遅刻早退
 
@@ -2406,7 +2406,7 @@ export const calculateTotalResultData =
         legal_over_inner_60_hour_time: line_legal_over_inner_60_hour_time, //法定外残業時間(C+D)_60時間以内
         legal_over_60_hour_time: line_legal_over_60_hour_time, //法定外残業時間(C+D)_60時間以上
         deep_night_time: line_deep_night_time, //深夜労働(B+D+F)
-        holiday_work_time: line_holiday_work_time, //休日労働(E+F)
+        holiday_work_time: line_holiday_work_time, //法休労働(E+F)
         absence_time: line_absence_time, //全日欠勤
         absence_not_all_day_time: line_absence_not_all_day_time, //欠勤
         late_start_time: line_late_start_time, //遅刻
@@ -2850,8 +2850,8 @@ export const calculateTotalResultData =
     //深夜労働(B+D+F)
     pro_late_night_work_time =
       payroll_midnight_nomal + payroll_midnight_over + payroll_midnight_holiday;
-    //休日労働(E+F)
-    pro_holiday_work_time = payroll_holiday + payroll_midnight_holiday; //休日労働(E+F)
+    //法休労働(E+F)
+    pro_holiday_work_time = payroll_holiday + payroll_midnight_holiday; //法休労働(E+F)
     //遅刻早退
     pro_late_fast_time = pro_late_start_time + pro_fast_end_time;
 
@@ -3048,7 +3048,7 @@ export const calculateTotalResultData =
       legal_works_over_inner_60_hour: legal_works_over_inner_60_hour, //法定外残業(C+D)_60時間以内
       legal_works_over_60_hour: legal_works_over_60_hour, //法定外残業(C+D)_60時間以上
       pro_late_night_work_time: pro_late_night_work_time, //深夜労働(B+D+F)
-      pro_holiday_work_time: pro_holiday_work_time, //休日労働(E+F)
+      pro_holiday_work_time: pro_holiday_work_time, //法休労働(E+F)
       pro_absence_time: pro_absence_time, //全日欠勤
       pro_absence_not_all_day_time: pro_absence_not_all_day_time, //欠勤
       pro_late_fast_time: pro_late_fast_time, //遅刻早退
