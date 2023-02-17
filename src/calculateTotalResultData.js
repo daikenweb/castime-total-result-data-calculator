@@ -3045,6 +3045,8 @@ export const calculateTotalResultData =
     let tg_month_yuuQ_stock = 0;
     let tg_month_furiQ_stock = 0;
     let tg_month_daiQ_stock = 0;
+    let tg_month_daitaiQ_stock = 0;
+    let tg_month_dokuziQ_stock = 0;
 
     let yuuQ_stock = 0;
     let yuuQ_plan = 0;
@@ -3057,6 +3059,8 @@ export const calculateTotalResultData =
     let tg_month_yuuQ_stock_half_day_unit = 0;
     let tg_month_furiQ_stock_half_day_unit = 0;
     let tg_month_daiQ_stock_half_day_unit = 0;
+    let tg_month_daitaiQ_stock_half_day_unit = 0;
+    let tg_month_dokuziQ_stock_half_day_unit = 0;
 
     let yuuQ_stock_half_day_unit = 0;
     let yuuQ_plan_half_day_unit = 0;
@@ -3070,6 +3074,8 @@ export const calculateTotalResultData =
       tg_month_yuuQ_stock = Number(res["Q_log"]["tg_month_yuuQ_number"]);
       tg_month_furiQ_stock = Number(res["Q_log"]["tg_month_furiQ_number"]);
       tg_month_daiQ_stock = Number(res["Q_log"]["tg_month_daiQ_number"]);
+      tg_month_daitaiQ_stock = Number(res["Q_log"]["tg_month_daitaiQ_number"]);
+      tg_month_dokuziQ_stock = Number(res["Q_log"]["tg_month_dokuziQ_number"]);
 
       yuuQ_stock = Number(res["Q_log"]["yuuQ_number"]);
       yuuQ_plan = Number(res["Q_log"]["yuuQ_plan_number"]);
@@ -3087,6 +3093,12 @@ export const calculateTotalResultData =
       );
       tg_month_daiQ_stock_half_day_unit = Number(
         res["Q_log"]["tg_month_daiQ_number"]
+      );
+      tg_month_daitaiQ_stock_half_day_unit = Number(
+        res["Q_log"]["tg_month_daitaiQ_number"]
+      );
+      tg_month_dokuziQ_stock_half_day_unit = Number(
+        res["Q_log"]["tg_month_dokuziQ_number"]
       );
 
       yuuQ_stock_half_day_unit = Number(res["Q_log"]["yuuQ_number"]);
@@ -3217,6 +3229,8 @@ export const calculateTotalResultData =
       tg_month_yuuQ_stock: tg_month_yuuQ_stock, //有休残数
       tg_month_furiQ_stock: tg_month_furiQ_stock, //振休残数
       tg_month_daiQ_stock: tg_month_daiQ_stock, //代休残数
+      tg_month_daitaiQ_stock: tg_month_daitaiQ_stock, //代替休暇残数
+      tg_month_dokuziQ_stock: tg_month_dokuziQ_stock, //独自休暇残数
 
       //休暇残時間(出力日時点)
       yuuQ_stock: yuuQ_stock, //有休残数
@@ -3248,6 +3262,10 @@ export const calculateTotalResultData =
         Number(tg_month_furiQ_stock_half_day_unit) / 2, //振休残数
       tg_month_daiQ_stock_half_day_unit:
         Number(tg_month_daiQ_stock_half_day_unit) / 2, //代休残数
+      tg_month_daitaiQ_stock_half_day_unit:
+        Number(tg_month_daitaiQ_stock_half_day_unit) / 2, //代替休暇残数
+      tg_month_dokuziQ_stock_half_day_unit:
+        Number(tg_month_dokuziQ_stock_half_day_unit) / 2, //独自休暇残数
 
       //休暇残時間(出力日時点)
       yuuQ_stock_half_day_unit: Number(yuuQ_stock_half_day_unit) / 2, //有休残数
