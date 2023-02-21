@@ -3054,6 +3054,10 @@ export const calculateTotalResultData =
     let huriQ_plan = 0;
     let daiQ_stock = 0;
     let daiQ_plan = 0;
+    let daitaiQ_stock = 0;
+    let daitaiQ_plan = 0;
+    let dokuziQ_stock = 0;
+    let dokuziQ_plan = 0;
 
     //日数単位項目
     let tg_month_yuuQ_stock_half_day_unit = 0;
@@ -3068,6 +3072,10 @@ export const calculateTotalResultData =
     let huriQ_plan_half_day_unit = 0;
     let daiQ_stock_half_day_unit = 0;
     let daiQ_plan_half_day_unit = 0;
+    let daitaiQ_stock_half_day_unit = 0;
+    let daitaiQ_plan_half_day_unit = 0;
+    let dokuziQ_stock_half_day_unit = 0;
+    let dokuziQ_plan_half_day_unit = 0;
 
     if (res["holiday_unit_type"] == 0) {
       //分数単位
@@ -3083,6 +3091,10 @@ export const calculateTotalResultData =
       huriQ_plan = Number(res["Q_log"]["huriQ_plan_number"]);
       daiQ_stock = Number(res["Q_log"]["daiQ_number"]);
       daiQ_plan = Number(res["Q_log"]["daiQ_plan_number"]);
+      daitaiQ_stock = Number(res["Q_log"]["daitaiQ_number"]);
+      daitaiQ_plan = Number(res["Q_log"]["daitaiQ_plan_number"]);
+      dokuziQ_stock = Number(res["Q_log"]["dokuziQ_number"]);
+      dokuziQ_plan = Number(res["Q_log"]["dokuziQ_plan_number"]);
     } else if (res["holiday_unit_type"] == 1) {
       //日数単位
       tg_month_yuuQ_stock_half_day_unit = Number(
@@ -3107,6 +3119,10 @@ export const calculateTotalResultData =
       huriQ_plan_half_day_unit = Number(res["Q_log"]["huriQ_plan_number"]);
       daiQ_stock_half_day_unit = Number(res["Q_log"]["daiQ_number"]);
       daiQ_plan_half_day_unit = Number(res["Q_log"]["daiQ_plan_number"]);
+      daitaiQ_stock_half_day_unit = Number(res["Q_log"]["daitaiQ_number"]);
+      daitaiQ_plan_half_day_unit = Number(res["Q_log"]["daitaiQ_plan_number"]);
+      dokuziQ_stock_half_day_unit = Number(res["Q_log"]["dokuziQ_number"]);
+      dokuziQ_plan_half_day_unit = Number(res["Q_log"]["dokuziQ_plan_number"]);
     }
     ///////////////////////////////////////////////////////////////
 
@@ -3239,6 +3255,10 @@ export const calculateTotalResultData =
       huriQ_plan: huriQ_plan, //振休消化予定
       daiQ_stock: daiQ_stock, //代休残数
       daiQ_plan: daiQ_plan, //代休消化予定
+      daitaiQ_stock: daitaiQ_stock, //代替休暇残数
+      daitaiQ_plan: daitaiQ_plan, //代替休暇消化予定
+      dokuziQ_stock: dokuziQ_stock, //独自休暇残数
+      dokuziQ_plan: dokuziQ_plan, //独自休暇消化予定
 
       //日数単位
       //休暇消化時間(集計月)
@@ -3274,6 +3294,10 @@ export const calculateTotalResultData =
       huriQ_plan_half_day_unit: Number(huriQ_plan_half_day_unit) / 2, //振休消化予定
       daiQ_stock_half_day_unit: Number(daiQ_stock_half_day_unit) / 2, //代休残数
       daiQ_plan_half_day_unit: Number(daiQ_plan_half_day_unit) / 2, //代休消化予定
+      daitaiQ_stock_half_day_unit: Number(daitaiQ_stock_half_day_unit) / 2, //代替休暇残数
+      daitaiQ_plan_half_day_unit: Number(daitaiQ_plan_half_day_unit) / 2, //代替休暇消化予定
+      dokuziQ_stock_half_day_unit: Number(dokuziQ_stock_half_day_unit) / 2, //独自休暇残数
+      dokuziQ_plan_half_day_unit: Number(dokuziQ_plan_half_day_unit) / 2, //独自休暇消化予定
       ///////////////////////////////
 
       report_label_data: report_label_data, //日報ラベル集計
