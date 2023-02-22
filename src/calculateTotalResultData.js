@@ -80,6 +80,7 @@ export const calculateTotalResultData =
     let legal_works_over_inner_60_hour = 0; //法定外残業(C+D)_60時間以内
     let legal_works_over_60_hour = 0; //法定外残業(C+D)_60時間以上
     let daitaiQ_transfer_time = 0; //代替休暇振替時間
+    let legal_works_over_60_hour_after_transfer = 0; //法定外残業(C+D)_60時間以上(代替休暇振替時間を引いた後)
     let pro_late_night_work_time = 0; //深夜労働(B+D+F)
     let pro_holiday_work_time = 0; //法休労働(E+F)
     let pro_absence_time = 0; //全日欠勤時間
@@ -3133,6 +3134,8 @@ export const calculateTotalResultData =
     }
     ///////////////////////////////////////////////////////////////
 
+    legal_works_over_60_hour_after_transfer = legal_works_over_60_hour - daitaiQ_transfer_time; //法定外残業(C+D)_60時間以上(代替休暇振替時間を引いた後)
+
     if (res["group_data"] != null) {
       var groupname = res["group_data"].name;
     } else {
@@ -3219,6 +3222,7 @@ export const calculateTotalResultData =
       legal_works_over_inner_60_hour: legal_works_over_inner_60_hour, //法定外残業(C+D)_60時間以内
       legal_works_over_60_hour: legal_works_over_60_hour, //法定外残業(C+D)_60時間以上
       daitaiQ_transfer_time: daitaiQ_transfer_time, //代替休暇振替時間
+      legal_works_over_60_hour_after_transfer: legal_works_over_60_hour_after_transfer, //法定外残業(C+D)_60時間以上(代替休暇振替時間を引いた後)
       pro_late_night_work_time: pro_late_night_work_time, //深夜労働(B+D+F)
       pro_holiday_work_time: pro_holiday_work_time, //法休労働(E+F)
       pro_absence_time: pro_absence_time, //全日欠勤
