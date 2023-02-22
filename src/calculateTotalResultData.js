@@ -79,6 +79,7 @@ export const calculateTotalResultData =
     let legal_works = { over: 0 }; //法定外残業(C+D)
     let legal_works_over_inner_60_hour = 0; //法定外残業(C+D)_60時間以内
     let legal_works_over_60_hour = 0; //法定外残業(C+D)_60時間以上
+    let daitaiQ_transfer_time = 0; //代替休暇振替時間
     let pro_late_night_work_time = 0; //深夜労働(B+D+F)
     let pro_holiday_work_time = 0; //法休労働(E+F)
     let pro_absence_time = 0; //全日欠勤時間
@@ -150,6 +151,8 @@ export const calculateTotalResultData =
     let arrayWeekNormalWorklimit = []; //週毎の上限
 
     let stock_week_nomal = 0; //給与計算の際の、週労働時間計算用
+
+    const daitaiQConversionRate = 0.25;
 
     /**********************************************************/
     //ループ前処理
@@ -3095,6 +3098,8 @@ export const calculateTotalResultData =
       daitaiQ_plan = Number(res["Q_log"]["daitaiQ_plan_number"]);
       dokuziQ_stock = Number(res["Q_log"]["dokuziQ_number"]);
       dokuziQ_plan = Number(res["Q_log"]["dokuziQ_plan_number"]);
+
+      daitaiQ_transfer_time = daitaiQ_in_time / daitaiQConversionRate;
     } else if (res["holiday_unit_type"] == 1) {
       //日数単位
       tg_month_yuuQ_stock_half_day_unit = Number(
@@ -3123,6 +3128,8 @@ export const calculateTotalResultData =
       daitaiQ_plan_half_day_unit = Number(res["Q_log"]["daitaiQ_plan_number"]);
       dokuziQ_stock_half_day_unit = Number(res["Q_log"]["dokuziQ_number"]);
       dokuziQ_plan_half_day_unit = Number(res["Q_log"]["dokuziQ_plan_number"]);
+
+      daitaiQ_transfer_time = (daitaiQ_in_time_half_day_unit * Number(res["user_data"]["workminutes_per_day"]) / 2) / daitaiQConversionRate;
     }
     ///////////////////////////////////////////////////////////////
 
@@ -3211,6 +3218,7 @@ export const calculateTotalResultData =
       legal_works_over: legal_works.over, //法定外残業(C+D)
       legal_works_over_inner_60_hour: legal_works_over_inner_60_hour, //法定外残業(C+D)_60時間以内
       legal_works_over_60_hour: legal_works_over_60_hour, //法定外残業(C+D)_60時間以上
+      daitaiQ_transfer_time: daitaiQ_transfer_time, //代替休暇振替時間
       pro_late_night_work_time: pro_late_night_work_time, //深夜労働(B+D+F)
       pro_holiday_work_time: pro_holiday_work_time, //法休労働(E+F)
       pro_absence_time: pro_absence_time, //全日欠勤
