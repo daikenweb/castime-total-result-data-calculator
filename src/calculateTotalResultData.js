@@ -24,7 +24,7 @@ import { CUSTOM_AGG, Deep_Night_AGG, OUT_WORK_AGG } from "./internal/index";
 export const calculateTotalResultData =
   ({ output_type, start_date, end_date }) =>
   (res) => {
-    //console.log("取得確認", res);
+    console.log("取得確認", res);
     const body_start = moment(start_date);
 
     //console.log("集計開始月",start_date);
@@ -79,6 +79,8 @@ export const calculateTotalResultData =
     let legal_works = { over: 0 }; //法定外残業(C+D)
     let legal_works_over_inner_60_hour = 0; //法定外残業(C+D)_60時間以内
     let legal_works_over_60_hour = 0; //法定外残業(C+D)_60時間以上
+    let daitaiQ_transfer_time = 0; //代替休暇振替時間
+    let legal_works_over_60_hour_after_transfer = 0; //法定外残業(C+D)_60時間以上(代替休暇振替時間を引いた後)
     let pro_late_night_work_time = 0; //深夜労働(B+D+F)
     let pro_holiday_work_time = 0; //法休労働(E+F)
     let pro_absence_time = 0; //全日欠勤時間
@@ -100,11 +102,15 @@ export const calculateTotalResultData =
     let yuuQ_time = 0; //有休消化時間
     let furiQ_time = 0; //振休消化時間
     let daiQ_time = 0; //代休消化時間
+    let daitaiQ_time = 0; //代替休暇消化時間
+    let dokuziQ_time = 0; //独自休暇消化時間
 
     //休暇付与時間(集計月)
     let yuuQ_in_time = 0; //有休付与時間
     let furiQ_in_time = 0; //振休付与時間
     let daiQ_in_time = 0; //代休付与時間
+    let daitaiQ_in_time = 0; //代替休暇付与時間
+    let dokuziQ_in_time = 0; //独自休暇付与時間
 
     /////////////////
     //日数単位
@@ -112,11 +118,15 @@ export const calculateTotalResultData =
     let yuuQ_time_half_day_unit = 0; //有休消化時間
     let furiQ_time_half_day_unit = 0; //振休消化時間
     let daiQ_time_half_day_unit = 0; //代休消化時間
+    let daitaiQ_time_half_day_unit = 0; //代替休暇消化時間
+    let dokuziQ_time_half_day_unit = 0; //独自休暇消化時間
 
     //休暇付与時間(集計月)
     let yuuQ_in_time_half_day_unit = 0; //有休付与時間
     let furiQ_in_time_half_day_unit = 0; //振休付与時間
     let daiQ_in_time_half_day_unit = 0; //代休付与時間
+    let daitaiQ_in_time_half_day_unit = 0; //代替休暇付与時間
+    let dokuziQ_in_time_half_day_unit = 0; //独自休暇付与時間
     /////////////////
 
     let request_data = []; //申請内容
@@ -142,6 +152,8 @@ export const calculateTotalResultData =
     let arrayWeekNormalWorklimit = []; //週毎の上限
 
     let stock_week_nomal = 0; //給与計算の際の、週労働時間計算用
+
+    const daitaiQConversionRate = 0.25;
 
     /**********************************************************/
     //ループ前処理
@@ -780,6 +792,12 @@ export const calculateTotalResultData =
             if (q_log_obj["type"] == 3) {
               line_state += "(代休消化)";
             } //代休消化
+            if (q_log_obj["type"] == 4) {
+              line_state += "(代替休暇消化)";
+            } //代替休暇消化
+            if (q_log_obj["type"] == 5) {
+              line_state += "(独自休暇消化)";
+            } //独自休暇消化
           }
           if (
             q_log_obj["in_date"] == obj["date"] &&
@@ -794,6 +812,12 @@ export const calculateTotalResultData =
             if (q_log_obj["type"] == 3) {
               line_state += "(代休付与)";
             } //代休付与
+            if (q_log_obj["type"] == 4) {
+              line_state += "(代替休暇付与)";
+            } //代替休暇付与
+            if (q_log_obj["type"] == 5) {
+              line_state += "(独自休暇付与)";
+            } //独自休暇付与
           }
         }
       } else if (obj["holiday_type"] == 2) {
@@ -852,6 +876,12 @@ export const calculateTotalResultData =
             if (q_log_obj["type"] == 3) {
               line_state += "(代休消化)";
             } //代休消化
+            if (q_log_obj["type"] == 4) {
+              line_state += "(代替休暇消化)";
+            } //代替休暇消化
+            if (q_log_obj["type"] == 5) {
+              line_state += "(独自休暇消化)";
+            } //独自休暇消化
           }
           if (
             q_log_obj["in_date"] == obj["date"] &&
@@ -866,6 +896,12 @@ export const calculateTotalResultData =
             if (q_log_obj["type"] == 3) {
               line_state += "(代休付与)";
             } //代休付与
+            if (q_log_obj["type"] == 4) {
+              line_state += "(代替休暇付与)";
+            } //代替休暇付与
+            if (q_log_obj["type"] == 5) {
+              line_state += "(独自休暇付与)";
+            } //独自休暇付与
           }
         }
       }
@@ -1566,11 +1602,15 @@ export const calculateTotalResultData =
       let line_yuuQ_time = 0; //有休消化時間
       let line_furiQ_time = 0; //振休消化時間
       let line_daiQ_time = 0; //代休消化時間
+      let line_daitaiQ_time = 0; //代替休暇消化時間
+      let line_dokuziQ_time = 0; //独自休暇消化時間
 
       //休暇付与時間(集計月)
       let line_yuuQ_in_time = 0; //有休付与時間
       let line_furiQ_in_time = 0; //振休付与時間
       let line_daiQ_in_time = 0; //代休付与時間
+      let line_daitaiQ_in_time = 0; //代替休暇付与時間
+      let line_dokuziQ_in_time = 0; //独自休暇付与時間
 
       //////////////////////////
       //日数単位
@@ -1578,11 +1618,15 @@ export const calculateTotalResultData =
       let line_yuuQ_time_half_day_unit = 0; //有休消化時間
       let line_furiQ_time_half_day_unit = 0; //振休消化時間
       let line_daiQ_time_half_day_unit = 0; //代休消化時間
+      let line_daitaiQ_time_half_day_unit = 0; //代替休暇消化時間
+      let line_dokuziQ_time_half_day_unit = 0; //独自休暇消化時間
 
       //休暇付与時間(集計月)
       let line_yuuQ_in_time_half_day_unit = 0; //有休付与時間
       let line_furiQ_in_time_half_day_unit = 0; //振休付与時間
       let line_daiQ_in_time_half_day_unit = 0; //代休付与時間
+      let line_daitaiQ_in_time_half_day_unit = 0; //代替休暇付与時間
+      let line_dokuziQ_in_time_half_day_unit = 0; //独自休暇付与時間
       //////////////////////////
 
       //勤務日数
@@ -1644,6 +1688,12 @@ export const calculateTotalResultData =
               if (q_log_obj["type"] == 3) {
                 line_scheduled_work_time += -Number(q_log_obj["value"]);
               } //代休消化
+              if (q_log_obj["type"] == 4) {
+                line_scheduled_work_time += -Number(q_log_obj["value"]);
+              } //代替休暇消化
+              if (q_log_obj["type"] == 5) {
+                line_scheduled_work_time += -Number(q_log_obj["value"]);
+              } //独自休暇消化
             }
           } else if (res["holiday_unit_type"] == 1) {
             //日数単位
@@ -1663,6 +1713,16 @@ export const calculateTotalResultData =
                   (-Number(q_log_obj["half_day_value"]) / 2) *
                   Number(res["user_data"]["workminutes_per_day"]);
               } //代休消化
+              if (q_log_obj["type"] == 4) {
+                line_scheduled_work_time +=
+                  (-Number(q_log_obj["half_day_value"]) / 2) *
+                  Number(res["user_data"]["workminutes_per_day"]);
+              } //代替休暇消化
+              if (q_log_obj["type"] == 5) {
+                line_scheduled_work_time +=
+                  (-Number(q_log_obj["half_day_value"]) / 2) *
+                  Number(res["user_data"]["workminutes_per_day"]);
+              } //独自休暇消化
             }
           }
         }
@@ -1829,6 +1889,12 @@ export const calculateTotalResultData =
             if (q_log_obj["type"] == 3) {
               line_daiQ_time += -Number(q_log_obj["value"]);
             } //代休消化
+            if (q_log_obj["type"] == 4) {
+              line_daitaiQ_time += -Number(q_log_obj["value"]);
+            } //代替休暇消化
+            if (q_log_obj["type"] == 5) {
+              line_dokuziQ_time += -Number(q_log_obj["value"]);
+            } //独自休暇消化
           }
           if (
             q_log_obj["in_date"] == obj["date"] &&
@@ -1844,6 +1910,12 @@ export const calculateTotalResultData =
             if (q_log_obj["type"] == 3) {
               line_daiQ_in_time += Number(q_log_obj["value"]);
             } //代休付与
+            if (q_log_obj["type"] == 4) {
+              line_daitaiQ_in_time += Number(q_log_obj["value"]);
+            } //代替休暇付与
+            if (q_log_obj["type"] == 5) {
+              line_dokuziQ_in_time += Number(q_log_obj["value"]);
+            } //独自休暇付与
           }
         } else if (res["holiday_unit_type"] == 1) {
           //日数単位
@@ -1863,6 +1935,16 @@ export const calculateTotalResultData =
                 q_log_obj["half_day_value"]
               );
             } //代休消化
+            if (q_log_obj["type"] == 4) {
+              line_daitaiQ_time_half_day_unit += -Number(
+                q_log_obj["half_day_value"]
+              );
+            } //代替休暇消化
+            if (q_log_obj["type"] == 5) {
+              line_dokuziQ_time_half_day_unit += -Number(
+                q_log_obj["half_day_value"]
+              );
+            } //独自休暇消化
           }
           if (
             q_log_obj["in_date"] == obj["date"] &&
@@ -1883,6 +1965,16 @@ export const calculateTotalResultData =
                 q_log_obj["half_day_value"]
               );
             } //代休付与
+            if (q_log_obj["type"] == 4) {
+              line_daitaiQ_in_time_half_day_unit += Number(
+                q_log_obj["half_day_value"]
+              );
+            } //代替休暇付与
+            if (q_log_obj["type"] == 5) {
+              line_dokuziQ_in_time_half_day_unit += Number(
+                q_log_obj["half_day_value"]
+              );
+            } //独自休暇付与
           }
         }
       }
@@ -2318,10 +2410,14 @@ export const calculateTotalResultData =
       yuuQ_time = yuuQ_time + line_yuuQ_time; //有休消化時間
       furiQ_time = furiQ_time + line_furiQ_time; //振休消化時間
       daiQ_time = daiQ_time + line_daiQ_time; //代休消化時間
+      daitaiQ_time = daitaiQ_time + line_daitaiQ_time; //代替休暇消化時間
+      dokuziQ_time = dokuziQ_time + line_dokuziQ_time; //独自休暇消化時間
       //休暇付与時間(集計月)
       yuuQ_in_time = yuuQ_in_time + line_yuuQ_in_time; //有休付与時間
       furiQ_in_time = furiQ_in_time + line_furiQ_in_time; //振休付与時間
       daiQ_in_time = daiQ_in_time + line_daiQ_in_time; //代休付与時間
+      daitaiQ_in_time = daitaiQ_in_time + line_daitaiQ_in_time; //代替休暇付与時間
+      dokuziQ_in_time = dokuziQ_in_time + line_dokuziQ_in_time; //独自休暇付与時間
 
       //日数単位
       //休暇消化時間(集計月)
@@ -2331,6 +2427,10 @@ export const calculateTotalResultData =
         furiQ_time_half_day_unit + line_furiQ_time_half_day_unit; //振休消化時間
       daiQ_time_half_day_unit =
         daiQ_time_half_day_unit + line_daiQ_time_half_day_unit; //代休消化時間
+      daitaiQ_time_half_day_unit = 
+        daitaiQ_time_half_day_unit + line_daitaiQ_time_half_day_unit; //代替休暇消化時間
+      dokuziQ_time_half_day_unit = 
+        dokuziQ_time_half_day_unit + line_dokuziQ_time_half_day_unit; //独自休暇消化時間
       //休暇付与時間(集計月)
       yuuQ_in_time_half_day_unit =
         yuuQ_in_time_half_day_unit + line_yuuQ_in_time_half_day_unit; //有休付与時間
@@ -2338,6 +2438,10 @@ export const calculateTotalResultData =
         furiQ_in_time_half_day_unit + line_furiQ_in_time_half_day_unit; //振休付与時間
       daiQ_in_time_half_day_unit =
         daiQ_in_time_half_day_unit + line_daiQ_in_time_half_day_unit; //代休付与時間
+      daitaiQ_in_time_half_day_unit = 
+        daitaiQ_in_time_half_day_unit + line_daitaiQ_in_time_half_day_unit; //代替休暇消化時間
+      dokuziQ_in_time_half_day_unit = 
+        dokuziQ_in_time_half_day_unit + line_dokuziQ_in_time_half_day_unit; //独自休暇消化時間
 
       let line_shift_patten_name = "-";
       let line_shift_patten_color = "";
@@ -2471,11 +2575,15 @@ export const calculateTotalResultData =
         yuuQ_time: line_yuuQ_time, //有休消化時間
         furiQ_time: line_furiQ_time, //振休消化時間
         daiQ_time: line_daiQ_time, //代休消化時間
+        daitaiQ_time: line_daitaiQ_time, //代替休暇消化時間
+        dokuziQ_time: line_dokuziQ_time, //独自休暇消化時間
 
         //休暇付与時間(集計月)
         yuuQ_in_time: line_yuuQ_in_time, //有休付与時間
         furiQ_in_time: line_furiQ_in_time, //振休付与時間
         daiQ_in_time: line_daiQ_in_time, //代休付与時間
+        daitaiQ_in_time: line_daitaiQ_in_time, //代替休暇付与時間
+        dokuziQ_in_time: line_dokuziQ_in_time, //独自休暇付与時間
 
         ////////////////////////
         //日数単位
@@ -2483,12 +2591,16 @@ export const calculateTotalResultData =
         yuuQ_time_half_day_unit: Number(line_yuuQ_time_half_day_unit) / 2, //有休消化時間
         furiQ_time_half_day_unit: Number(line_furiQ_time_half_day_unit) / 2, //振休消化時間
         daiQ_time_half_day_unit: Number(line_daiQ_time_half_day_unit) / 2, //代休消化時間
+        daitaiQ_time_half_day_unit: Number(line_daitaiQ_time_half_day_unit) / 2, //代替休暇消化時間
+        dokuziQ_time_half_day_unit: Number(line_dokuziQ_time_half_day_unit) / 2, //独自休暇消化時間
 
         //休暇付与時間(集計月)
         yuuQ_in_time_half_day_unit: Number(line_yuuQ_in_time_half_day_unit) / 2, //有休付与時間
         furiQ_in_time_half_day_unit:
           Number(line_furiQ_in_time_half_day_unit) / 2, //振休付与時間
         daiQ_in_time_half_day_unit: Number(line_daiQ_in_time_half_day_unit) / 2, //代休付与時間
+        daitaiQ_in_time_half_day_unit: Number(line_daitaiQ_in_time_half_day_unit) / 2, //代替休暇消化時間
+        dokuziQ_in_time_half_day_unit: Number(line_dokuziQ_in_time_half_day_unit) / 2, //独自休暇消化時間
         ////////////////////////
 
         result_review_state: obj["data"]["review_state"], //勤務実績確認状況
@@ -2937,6 +3049,8 @@ export const calculateTotalResultData =
     let tg_month_yuuQ_stock = 0;
     let tg_month_furiQ_stock = 0;
     let tg_month_daiQ_stock = 0;
+    let tg_month_daitaiQ_stock = 0;
+    let tg_month_dokuziQ_stock = 0;
 
     let yuuQ_stock = 0;
     let yuuQ_plan = 0;
@@ -2944,11 +3058,17 @@ export const calculateTotalResultData =
     let huriQ_plan = 0;
     let daiQ_stock = 0;
     let daiQ_plan = 0;
+    let daitaiQ_stock = 0;
+    let daitaiQ_plan = 0;
+    let dokuziQ_stock = 0;
+    let dokuziQ_plan = 0;
 
     //日数単位項目
     let tg_month_yuuQ_stock_half_day_unit = 0;
     let tg_month_furiQ_stock_half_day_unit = 0;
     let tg_month_daiQ_stock_half_day_unit = 0;
+    let tg_month_daitaiQ_stock_half_day_unit = 0;
+    let tg_month_dokuziQ_stock_half_day_unit = 0;
 
     let yuuQ_stock_half_day_unit = 0;
     let yuuQ_plan_half_day_unit = 0;
@@ -2956,12 +3076,18 @@ export const calculateTotalResultData =
     let huriQ_plan_half_day_unit = 0;
     let daiQ_stock_half_day_unit = 0;
     let daiQ_plan_half_day_unit = 0;
+    let daitaiQ_stock_half_day_unit = 0;
+    let daitaiQ_plan_half_day_unit = 0;
+    let dokuziQ_stock_half_day_unit = 0;
+    let dokuziQ_plan_half_day_unit = 0;
 
     if (res["holiday_unit_type"] == 0) {
       //分数単位
       tg_month_yuuQ_stock = Number(res["Q_log"]["tg_month_yuuQ_number"]);
       tg_month_furiQ_stock = Number(res["Q_log"]["tg_month_furiQ_number"]);
       tg_month_daiQ_stock = Number(res["Q_log"]["tg_month_daiQ_number"]);
+      tg_month_daitaiQ_stock = Number(res["Q_log"]["tg_month_daitaiQ_number"]);
+      tg_month_dokuziQ_stock = Number(res["Q_log"]["tg_month_dokuziQ_number"]);
 
       yuuQ_stock = Number(res["Q_log"]["yuuQ_number"]);
       yuuQ_plan = Number(res["Q_log"]["yuuQ_plan_number"]);
@@ -2969,6 +3095,12 @@ export const calculateTotalResultData =
       huriQ_plan = Number(res["Q_log"]["huriQ_plan_number"]);
       daiQ_stock = Number(res["Q_log"]["daiQ_number"]);
       daiQ_plan = Number(res["Q_log"]["daiQ_plan_number"]);
+      daitaiQ_stock = Number(res["Q_log"]["daitaiQ_number"]);
+      daitaiQ_plan = Number(res["Q_log"]["daitaiQ_plan_number"]);
+      dokuziQ_stock = Number(res["Q_log"]["dokuziQ_number"]);
+      dokuziQ_plan = Number(res["Q_log"]["dokuziQ_plan_number"]);
+
+      daitaiQ_transfer_time = daitaiQ_in_time / daitaiQConversionRate;
     } else if (res["holiday_unit_type"] == 1) {
       //日数単位
       tg_month_yuuQ_stock_half_day_unit = Number(
@@ -2980,6 +3112,12 @@ export const calculateTotalResultData =
       tg_month_daiQ_stock_half_day_unit = Number(
         res["Q_log"]["tg_month_daiQ_number"]
       );
+      tg_month_daitaiQ_stock_half_day_unit = Number(
+        res["Q_log"]["tg_month_daitaiQ_number"]
+      );
+      tg_month_dokuziQ_stock_half_day_unit = Number(
+        res["Q_log"]["tg_month_dokuziQ_number"]
+      );
 
       yuuQ_stock_half_day_unit = Number(res["Q_log"]["yuuQ_number"]);
       yuuQ_plan_half_day_unit = Number(res["Q_log"]["yuuQ_plan_number"]);
@@ -2987,8 +3125,16 @@ export const calculateTotalResultData =
       huriQ_plan_half_day_unit = Number(res["Q_log"]["huriQ_plan_number"]);
       daiQ_stock_half_day_unit = Number(res["Q_log"]["daiQ_number"]);
       daiQ_plan_half_day_unit = Number(res["Q_log"]["daiQ_plan_number"]);
+      daitaiQ_stock_half_day_unit = Number(res["Q_log"]["daitaiQ_number"]);
+      daitaiQ_plan_half_day_unit = Number(res["Q_log"]["daitaiQ_plan_number"]);
+      dokuziQ_stock_half_day_unit = Number(res["Q_log"]["dokuziQ_number"]);
+      dokuziQ_plan_half_day_unit = Number(res["Q_log"]["dokuziQ_plan_number"]);
+
+      daitaiQ_transfer_time = (daitaiQ_in_time_half_day_unit * Number(res["user_data"]["workminutes_per_day"]) / 2) / daitaiQConversionRate;
     }
     ///////////////////////////////////////////////////////////////
+
+    legal_works_over_60_hour_after_transfer = legal_works_over_60_hour - daitaiQ_transfer_time; //法定外残業(C+D)_60時間以上(代替休暇振替時間を引いた後)
 
     if (res["group_data"] != null) {
       var groupname = res["group_data"].name;
@@ -3075,6 +3221,8 @@ export const calculateTotalResultData =
       legal_works_over: legal_works.over, //法定外残業(C+D)
       legal_works_over_inner_60_hour: legal_works_over_inner_60_hour, //法定外残業(C+D)_60時間以内
       legal_works_over_60_hour: legal_works_over_60_hour, //法定外残業(C+D)_60時間以上
+      daitaiQ_transfer_time: daitaiQ_transfer_time, //代替休暇振替時間
+      legal_works_over_60_hour_after_transfer: legal_works_over_60_hour_after_transfer, //法定外残業(C+D)_60時間以上(代替休暇振替時間を引いた後)
       pro_late_night_work_time: pro_late_night_work_time, //深夜労働(B+D+F)
       pro_holiday_work_time: pro_holiday_work_time, //法休労働(E+F)
       pro_absence_time: pro_absence_time, //全日欠勤
@@ -3095,16 +3243,22 @@ export const calculateTotalResultData =
       yuuQ_time: yuuQ_time, //有休消化
       furiQ_time: furiQ_time, //振休消化
       daiQ_time: daiQ_time, //代休消化
+      daitaiQ_time: daitaiQ_time, //代替休暇消化
+      dokuziQ_time: dokuziQ_time, //独自休暇消化
 
       //休暇付与時間(集計月)
       yuuQ_in_time: yuuQ_in_time, //有休付与
       furiQ_in_time: furiQ_in_time, //振休付与
       daiQ_in_time: daiQ_in_time, //代休付与
+      daitaiQ_in_time: daitaiQ_in_time, //代替休暇付与
+      dokuziQ_in_time: dokuziQ_in_time, //独自休暇付与
 
       //休暇残時間(集計時点)
       tg_month_yuuQ_stock: tg_month_yuuQ_stock, //有休残数
       tg_month_furiQ_stock: tg_month_furiQ_stock, //振休残数
       tg_month_daiQ_stock: tg_month_daiQ_stock, //代休残数
+      tg_month_daitaiQ_stock: tg_month_daitaiQ_stock, //代替休暇残数
+      tg_month_dokuziQ_stock: tg_month_dokuziQ_stock, //独自休暇残数
 
       //休暇残時間(出力日時点)
       yuuQ_stock: yuuQ_stock, //有休残数
@@ -3113,17 +3267,25 @@ export const calculateTotalResultData =
       huriQ_plan: huriQ_plan, //振休消化予定
       daiQ_stock: daiQ_stock, //代休残数
       daiQ_plan: daiQ_plan, //代休消化予定
+      daitaiQ_stock: daitaiQ_stock, //代替休暇残数
+      daitaiQ_plan: daitaiQ_plan, //代替休暇消化予定
+      dokuziQ_stock: dokuziQ_stock, //独自休暇残数
+      dokuziQ_plan: dokuziQ_plan, //独自休暇消化予定
 
       //日数単位
       //休暇消化時間(集計月)
       yuuQ_time_half_day_unit: Number(yuuQ_time_half_day_unit) / 2, //有休消化
       furiQ_time_half_day_unit: Number(furiQ_time_half_day_unit) / 2, //振休消化
       daiQ_time_half_day_unit: Number(daiQ_time_half_day_unit) / 2, //代休消化
+      daitaiQ_time_half_day_unit: Number(daitaiQ_time_half_day_unit) / 2, //代替休暇消化
+      dokuziQ_time_half_day_unit: Number(dokuziQ_time_half_day_unit) / 2, //独自休暇消化
 
       //休暇付与時間(集計月)
       yuuQ_in_time_half_day_unit: Number(yuuQ_in_time_half_day_unit) / 2, //有休付与
       furiQ_in_time_half_day_unit: Number(furiQ_in_time_half_day_unit) / 2, //振休付与
       daiQ_in_time_half_day_unit: Number(daiQ_in_time_half_day_unit) / 2, //代休付与
+      daitaiQ_in_time_half_day_unit: Number(daitaiQ_in_time_half_day_unit) / 2, //代替休暇付与
+      dokuziQ_in_time_half_day_unit: Number(dokuziQ_in_time_half_day_unit) / 2, //独自休暇付与
 
       //休暇残時間(集計時点)
       tg_month_yuuQ_stock_half_day_unit:
@@ -3132,6 +3294,10 @@ export const calculateTotalResultData =
         Number(tg_month_furiQ_stock_half_day_unit) / 2, //振休残数
       tg_month_daiQ_stock_half_day_unit:
         Number(tg_month_daiQ_stock_half_day_unit) / 2, //代休残数
+      tg_month_daitaiQ_stock_half_day_unit:
+        Number(tg_month_daitaiQ_stock_half_day_unit) / 2, //代替休暇残数
+      tg_month_dokuziQ_stock_half_day_unit:
+        Number(tg_month_dokuziQ_stock_half_day_unit) / 2, //独自休暇残数
 
       //休暇残時間(出力日時点)
       yuuQ_stock_half_day_unit: Number(yuuQ_stock_half_day_unit) / 2, //有休残数
@@ -3140,6 +3306,10 @@ export const calculateTotalResultData =
       huriQ_plan_half_day_unit: Number(huriQ_plan_half_day_unit) / 2, //振休消化予定
       daiQ_stock_half_day_unit: Number(daiQ_stock_half_day_unit) / 2, //代休残数
       daiQ_plan_half_day_unit: Number(daiQ_plan_half_day_unit) / 2, //代休消化予定
+      daitaiQ_stock_half_day_unit: Number(daitaiQ_stock_half_day_unit) / 2, //代替休暇残数
+      daitaiQ_plan_half_day_unit: Number(daitaiQ_plan_half_day_unit) / 2, //代替休暇消化予定
+      dokuziQ_stock_half_day_unit: Number(dokuziQ_stock_half_day_unit) / 2, //独自休暇残数
+      dokuziQ_plan_half_day_unit: Number(dokuziQ_plan_half_day_unit) / 2, //独自休暇消化予定
       ///////////////////////////////
 
       report_label_data: report_label_data, //日報ラベル集計
