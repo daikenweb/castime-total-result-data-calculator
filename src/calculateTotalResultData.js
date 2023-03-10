@@ -678,13 +678,19 @@ export const calculateTotalResultData =
       //勤務状況表記生成
       var line_state = "";
       var state_error_flag = 0; //欠勤だった場合は1に
-      var in_date_search = function (days, tday) {
+      const in_date_search = function (qtype, tday) {
         let iday = "";
-        days.forEach(function (value) {
-          if (value["out_date"] == tday) {
+        res["Q_log"]["tg_month_Q_breakdown"].forEach(function (value) {
+          if (value["out_date"] == tday && value["type"] == qtype) {
             let im = value["in_date"].split("-")[1];
             let id = value["in_date"].split("-")[2];
             iday += "(" + im + "/" + id + ")";
+          }
+          if (value["out_date"] == tday && 6 == qtype) {
+            const v_type_list = ['有休', '振休', '代休', '代替休暇', '独自休暇'];
+            let im = value["in_date"].split("-")[1];
+            let id = value["in_date"].split("-")[2];
+            iday += v_type_list[value["type"] - 1] + "(" + im + "/" + id + ")";
           }
         });
         return iday;
@@ -701,21 +707,23 @@ export const calculateTotalResultData =
           line_state = "予定";
         } else if (obj["result_start"] == "" || obj["result_end"] == "") {
           if (obj["Q_type"] == 1) {
-            line_state = "有給休暇";
+            line_state = "有休";
+            line_state += in_date_search(1, obj["date"]);
           } else if (obj["Q_type"] == 2) {
-            line_state = "振替休暇";
-            line_state += in_date_search(
-              res["Q_log"]["huriQ_days"],
-              obj["date"]
-            );
+            line_state = "振休";
+            line_state += in_date_search(2, obj["date"]);
           } else if (obj["Q_type"] == 3) {
             line_state = "代休";
-            line_state += in_date_search(
-              res["Q_log"]["daiQ_days"],
-              obj["date"]
-            );
+            line_state += in_date_search(3, obj["date"]);
           } else if (obj["Q_type"] == 4) {
-            line_state = "慶弔休暇";
+            line_state = "代替休暇";
+            line_state += in_date_search(4, obj["date"]);
+          } else if (obj["Q_type"] == 5) {
+            line_state = "独自休暇";
+            line_state += in_date_search(5, obj["date"]);
+          } else if (obj["Q_type"] == 6) {
+            //line_state = "組み合わせ休暇";
+            line_state += in_date_search(6, obj["date"]);
           } else {
             line_state = "欠勤";
             state_error_flag = 1;
