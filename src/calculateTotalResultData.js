@@ -731,12 +731,22 @@ export const calculateTotalResultData =
         } else {
           if (obj["Q_type"] == 1) {
             line_state = "勤務(有休)";
+            line_state += in_date_search(1, obj["date"]);
           } else if (obj["Q_type"] == 2) {
             line_state = "勤務(振休)";
+            line_state += in_date_search(2, obj["date"]);
           } else if (obj["Q_type"] == 3) {
             line_state = "勤務(代休)";
+            line_state += in_date_search(3, obj["date"]);
           } else if (obj["Q_type"] == 4) {
-            line_state = "勤務(慶弔)";
+            line_state = "勤務(代替休暇)";
+            line_state += in_date_search(4, obj["date"]);
+          } else if (obj["Q_type"] == 5) {
+            line_state = "勤務(独自休暇)";
+            line_state += in_date_search(5, obj["date"]);
+          } else if (obj["Q_type"] == 6) {
+            line_state = "勤務(";
+            line_state += in_date_search(6, obj["date"]) + ")";
           } else if (obj["work_time"] != 0) {
             line_state = "勤務";
           } else {
