@@ -687,10 +687,10 @@ export const calculateTotalResultData =
             iday += "(" + im + "/" + id + ")";
           }
           if (value["out_date"] == tday && 6 == qtype) {
-            const v_type_list = ['有休', '振休', '代休', '代替休暇', '独自休暇'];
+            const vTypeList = ['有休', '振休', '代休', '代替休暇', '独自休暇'];
             let im = value["in_date"].split("-")[1];
             let id = value["in_date"].split("-")[2];
-            iday += v_type_list[value["type"] - 1] + "(" + im + "/" + id + ")";
+            iday += vTypeList[value["type"] - 1] + "(" + im + "/" + id + ")";
           }
         });
         return iday;
@@ -947,6 +947,17 @@ export const calculateTotalResultData =
           } else if (obj["bad_start"] == "0" && obj["bad_end"] == "1") {
             line_state += "(早退)"; // 遅刻・早退に該当すれば表示を「遅刻・早退」にする。
           }
+        }
+      }
+
+      let holidayLogsRemarksArray = [];
+      for (let q_log_obj of res["Q_log"]["tg_month_Q_breakdown"]) {
+        const vTypeList = ['有休', '振休', '代休', '代替休暇', '独自休暇'];
+        if (q_log_obj["in_date"] == obj["date"] && q_log_obj["out_date"] == "") {
+          holidayLogsRemarksArray.push({title: vTypeList[q_log_obj["type"] - 1], logType: "in", data: q_log_obj });
+        }
+        if (q_log_obj["out_date"] == obj["date"]) {
+          holidayLogsRemarksArray.push({title: vTypeList[q_log_obj["type"] - 1], logType: "out", data: q_log_obj });
         }
       }
 
@@ -2586,6 +2597,8 @@ export const calculateTotalResultData =
         payroll_midnight_over_60_hour: oneday_payroll_midnight_over_60_hour, //深夜_残業60時間以上(D')
         payroll_over_inner_60_hour: oneday_payroll_over_inner_60_hour, //日中_残業60時間以内(C'')
         payroll_midnight_over_inner_60_hour: oneday_payroll_midnight_over_inner_60_hour, //深夜_残業60時間以内(D'')
+
+        holiday_logs_remarks_array: holidayLogsRemarksArray, //休暇履歴備考
 
         ////////////////////////
         //分数単位
