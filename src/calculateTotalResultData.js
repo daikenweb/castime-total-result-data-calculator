@@ -234,27 +234,11 @@ export const calculateTotalResultData =
             }
           }
 
-          if (obj["Q_type"] != 0) {
-            if (
-              Number(obj["yuuQ"]) < 0 ||
-              Number(obj["furiQ"]) < 0 ||
-              Number(obj["daiQ"]) < 0 ||
-              obj["Q_type"] == 4
-            ) {
-              if (
-                old_r_obj["tg_date"] == obj["date"] &&
-                res["reqests"]["type"][old_r_i] == 2
-              ) {
-                line_request_data["vac"] = old_r_obj;
-              }
-            } else {
-              if (
-                old_r_obj["tg_date"] == obj["date"] &&
-                res["reqests"]["type"][old_r_i] == 3
-              ) {
-                line_request_data["holiday_work"] = old_r_obj;
-              }
-            }
+          if(old_r_obj["tg_date"] == obj["date"] && res["reqests"]["type"][old_r_i] == 2){
+              line_request_data["vac"] = old_r_obj;
+          }
+          if(old_r_obj["tg_date"] == obj["date"] && res["reqests"]["type"][old_r_i] == 3){
+            line_request_data["holiday_work"] = old_r_obj;
           }
 
           if (obj["data"]["over_time"]["request"] != null) {
