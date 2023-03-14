@@ -3159,7 +3159,7 @@ export const calculateTotalResultData =
 
 
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
-    const version = "v20230201";
+    const version = "v20230314";
 
     let res_data = {
       version: version, //集計処理のバージョン
