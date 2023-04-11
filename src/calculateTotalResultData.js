@@ -67,6 +67,7 @@ export const calculateTotalResultData =
     let pro_holiday_number = 0; //休日(所定＋法定)
     let pro_normal_holiday_number = 0; //所定休日日数
     let pro_legal_holiday_number = 0; //法定休日日数
+    let pro_not_set_day_number = 0; //未設定日数
 
     //勤務時間
     let pro_work_time = 0; //勤務時間(A～F)
@@ -1611,6 +1612,8 @@ export const calculateTotalResultData =
 
       let line_normal_holiday_work_time = 0; //所定休日労働
 
+      let line_not_set_day_flag = 0; //未設定日フラグ
+
       /////////////////////////
       //分数単位
       //休暇消化時間(集計月)
@@ -1993,6 +1996,16 @@ export const calculateTotalResultData =
           }
         }
       }
+
+      if (Number(obj["holiday_type"]) == 0
+       && obj["plan_start"] == "" && obj["plan_end"] == ""
+       && line_yuuQ_time == 0 && line_furiQ_time == 0 && line_daiQ_time == 0 && line_daitaiQ_time == 0 && line_dokuziQ_time == 0
+       && line_yuuQ_time_half_day_unit == 0 && line_furiQ_time_half_day_unit == 0 && line_daiQ_time_half_day_unit == 0 && line_daitaiQ_time_half_day_unit == 0 && line_dokuziQ_time_half_day_unit == 0
+       ) {
+        pro_not_set_day_number++;
+        line_not_set_day_flag = 1; //未設定日フラグ
+      } //未設定日数
+
       ////////////////////////////////
 
       //6_19追記(時間丸め系処理)
@@ -2535,6 +2548,8 @@ export const calculateTotalResultData =
 
         shift_patten_name: line_shift_patten_name,
         shift_patten_color: line_shift_patten_color,
+
+        not_set_day_flag: line_not_set_day_flag, //未設定日フラグ
 
         shift: line_shift, //シフト
         plan_start: obj["plan_start"], //シフト出勤時刻
@@ -3164,7 +3179,7 @@ export const calculateTotalResultData =
     const version = "v20230314";
 
     //集計が正しく行えなくなる設定不備の警告
-    let worningArray = {shiftTemplate:0, holidayUnitType:0,};
+    let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0};
 
     let workingType = 0;
     if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
@@ -3175,6 +3190,7 @@ export const calculateTotalResultData =
     if(res["holiday_unit_type"] == null){ //休暇単位がない場合
       worningArray.holidayUnitType = 1;
     }
+    worningArray.notSetDayNumber = pro_not_set_day_number; //未設定日数
 
     let res_data = {
       version: version, //集計処理のバージョン
@@ -3241,6 +3257,7 @@ export const calculateTotalResultData =
       pro_holiday_number: pro_holiday_number, //休日(所定＋法定)
       pro_normal_holiday_number: pro_normal_holiday_number, //所定休日日数
       pro_legal_holiday_number: pro_legal_holiday_number, //法定休日日数
+      pro_not_set_day_number: pro_not_set_day_number, //未設定日数
 
       //勤務時間
       pro_work_time: pro_work_time, //勤務(A～F合計)
