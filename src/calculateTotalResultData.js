@@ -3163,14 +3163,23 @@ export const calculateTotalResultData =
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
     const version = "v20230314";
 
+    //集計が正しく行えなくなる設定不備の警告
+    let worningArray = {shiftTemplate:0, holidayUnitType:0,};
+
     let workingType = 0;
     if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
       workingType = res["shift_template_data"]["working_type"]; //労働制度 0:通常労働制 1:変形労働制
+    } else {
+      worningArray.shiftTemplate = 1;
+    }
+    if(res["holiday_unit_type"] == null){ //休暇単位がない場合
+      worningArray.holidayUnitType = 1;
     }
 
     let res_data = {
       version: version, //集計処理のバージョン
       aggregate_date: aggregate_date, //集計日
+      worning_array: worningArray, //設定不備の警告
 
       //基本情報
       target_month: target_month, //対象月
