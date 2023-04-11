@@ -1081,39 +1081,41 @@ export const calculateTotalResultData =
       }
 
       //変形労働制の場合は日の上限、週の上限を上書き
-      if(res["shift_template_data"]["working_type"] != null){
-        if(res["shift_template_data"]["working_type"] == 1){
-          //console.log("変形労働制");
+      if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
+        if(res["shift_template_data"]["working_type"] != null){
+          if(res["shift_template_data"]["working_type"] == 1){
+            //console.log("変形労働制");
 
-          
-          if(obj["normal_work_limit"] < 8*60){
-            ONEDAY_NORMAL = 8*60; //日の上限が8時間を下回る場合は8時間で代入
-          } else {
-            ONEDAY_NORMAL = obj["normal_work_limit"];
-          }
-          
-          if (res["user_data"].work_begin.day == weeks[moment(obj["date"]).day()]) {
-            //console.log("週毎の勤務時間上限ストック初期化",obj["date"],obj);
-            //この週の法定内労働時間の上限を計算
-            let limitWeekNormal = 0;
-            for(let objWorkRecord of res["work_record"]){
-              if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) <= moment(obj["date"]).add(6, 'days')){
-                //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
-                limitWeekNormal = limitWeekNormal + objWorkRecord["normal_work_limit"];
-              }
-            }
-            if(limitWeekNormal < 40*60){
-              WEEK_NORMAL = 40*60; //週の上限が40時間を下回る場合は8時間で代入
+            
+            if(obj["normal_work_limit"] < 8*60){
+              ONEDAY_NORMAL = 8*60; //日の上限が8時間を下回る場合は8時間で代入
             } else {
-              WEEK_NORMAL = limitWeekNormal;
+              ONEDAY_NORMAL = obj["normal_work_limit"];
             }
-            //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
+            
+            if (res["user_data"].work_begin.day == weeks[moment(obj["date"]).day()]) {
+              //console.log("週毎の勤務時間上限ストック初期化",obj["date"],obj);
+              //この週の法定内労働時間の上限を計算
+              let limitWeekNormal = 0;
+              for(let objWorkRecord of res["work_record"]){
+                if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) <= moment(obj["date"]).add(6, 'days')){
+                  //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
+                  limitWeekNormal = limitWeekNormal + objWorkRecord["normal_work_limit"];
+                }
+              }
+              if(limitWeekNormal < 40*60){
+                WEEK_NORMAL = 40*60; //週の上限が40時間を下回る場合は8時間で代入
+              } else {
+                WEEK_NORMAL = limitWeekNormal;
+              }
+              //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
 
-            arrayWeekNormalWorklimit.push({
-              start: obj["date"],
-              end: moment(obj["date"]).add(6, 'days').format("YYYY-MM-DD"),
-              total_limit_time: limitWeekNormal,
-            });
+              arrayWeekNormalWorklimit.push({
+                start: obj["date"],
+                end: moment(obj["date"]).add(6, 'days').format("YYYY-MM-DD"),
+                total_limit_time: limitWeekNormal,
+              });
+            }
           }
         }
       }
@@ -3161,6 +3163,11 @@ export const calculateTotalResultData =
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
     const version = "v20230314";
 
+    let workingType = 0;
+    if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
+      workingType = res["shift_template_data"]["working_type"]; //労働制度 0:通常労働制 1:変形労働制
+    }
+
     let res_data = {
       version: version, //集計処理のバージョン
       aggregate_date: aggregate_date, //集計日
@@ -3192,7 +3199,7 @@ export const calculateTotalResultData =
         res["user_data"]["group_shift_result_review"]
       ), //勤務実績確認状況表示
       holiday_unit_type: res["holiday_unit_type"], //休暇単位 0:分数単位 1:日数単位
-      working_type: res["shift_template_data"]["working_type"], //労働志度 0:通常労働制 1:変形労働制
+      working_type: workingType, //労働制度 0:通常労働制 1:変形労働制
       normal_work_month_limit: NumbermonthNormalWorklimit, //月合計の法定内の労働時間の上限
       normal_work_week_limit: arrayWeekNormalWorklimit, //週毎の法定内の労働時間の上限
 
