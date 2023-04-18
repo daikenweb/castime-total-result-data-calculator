@@ -67,6 +67,8 @@ export const calculateTotalResultData =
     let pro_holiday_number = 0; //休日(所定＋法定)
     let pro_normal_holiday_number = 0; //所定休日日数
     let pro_legal_holiday_number = 0; //法定休日日数
+    let pro_not_set_day_number = 0; //未設定日数
+    let pro_break_time_disagreement_number = 0; //休憩シフト、休憩実績不一致日数
 
     //勤務時間
     let pro_work_time = 0; //勤務時間(A～F)
@@ -1081,39 +1083,41 @@ export const calculateTotalResultData =
       }
 
       //変形労働制の場合は日の上限、週の上限を上書き
-      if(res["shift_template_data"]["working_type"] != null){
-        if(res["shift_template_data"]["working_type"] == 1){
-          //console.log("変形労働制");
+      if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
+        if(res["shift_template_data"]["working_type"] != null){
+          if(res["shift_template_data"]["working_type"] == 1){
+            //console.log("変形労働制");
 
-          
-          if(obj["normal_work_limit"] < 8*60){
-            ONEDAY_NORMAL = 8*60; //日の上限が8時間を下回る場合は8時間で代入
-          } else {
-            ONEDAY_NORMAL = obj["normal_work_limit"];
-          }
-          
-          if (res["user_data"].work_begin.day == weeks[moment(obj["date"]).day()]) {
-            //console.log("週毎の勤務時間上限ストック初期化",obj["date"],obj);
-            //この週の法定内労働時間の上限を計算
-            let limitWeekNormal = 0;
-            for(let objWorkRecord of res["work_record"]){
-              if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) <= moment(obj["date"]).add(6, 'days')){
-                //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
-                limitWeekNormal = limitWeekNormal + objWorkRecord["normal_work_limit"];
-              }
-            }
-            if(limitWeekNormal < 40*60){
-              WEEK_NORMAL = 40*60; //週の上限が40時間を下回る場合は8時間で代入
+            
+            if(obj["normal_work_limit"] < 8*60){
+              ONEDAY_NORMAL = 8*60; //日の上限が8時間を下回る場合は8時間で代入
             } else {
-              WEEK_NORMAL = limitWeekNormal;
+              ONEDAY_NORMAL = obj["normal_work_limit"];
             }
-            //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
+            
+            if (res["user_data"].work_begin.day == weeks[moment(obj["date"]).day()]) {
+              //console.log("週毎の勤務時間上限ストック初期化",obj["date"],obj);
+              //この週の法定内労働時間の上限を計算
+              let limitWeekNormal = 0;
+              for(let objWorkRecord of res["work_record"]){
+                if(moment(obj["date"]) <= moment(objWorkRecord["date"]) && moment(objWorkRecord["date"]) <= moment(obj["date"]).add(6, 'days')){
+                  //console.log(objWorkRecord["date"],objWorkRecord["normal_work_limit"]);
+                  limitWeekNormal = limitWeekNormal + objWorkRecord["normal_work_limit"];
+                }
+              }
+              if(limitWeekNormal < 40*60){
+                WEEK_NORMAL = 40*60; //週の上限が40時間を下回る場合は8時間で代入
+              } else {
+                WEEK_NORMAL = limitWeekNormal;
+              }
+              //console.log("この週の法定内労働の上限",WEEK_NORMAL + "分",WEEK_NORMAL / 60 + "時間");
 
-            arrayWeekNormalWorklimit.push({
-              start: obj["date"],
-              end: moment(obj["date"]).add(6, 'days').format("YYYY-MM-DD"),
-              total_limit_time: limitWeekNormal,
-            });
+              arrayWeekNormalWorklimit.push({
+                start: obj["date"],
+                end: moment(obj["date"]).add(6, 'days').format("YYYY-MM-DD"),
+                total_limit_time: limitWeekNormal,
+              });
+            }
           }
         }
       }
@@ -1609,6 +1613,9 @@ export const calculateTotalResultData =
 
       let line_normal_holiday_work_time = 0; //所定休日労働
 
+      let line_not_set_day_flag = 0; //未設定日フラグ
+      let line_break_time_disagreement_flag = 0; //休憩シフト、休憩実績不一致フラグ
+
       /////////////////////////
       //分数単位
       //休暇消化時間(集計月)
@@ -1988,6 +1995,32 @@ export const calculateTotalResultData =
                 q_log_obj["half_day_value"]
               );
             } //独自休暇付与
+          }
+        }
+      }
+
+      if (Number(obj["holiday_type"]) == 0
+       && obj["plan_start"] == "" && obj["plan_end"] == ""
+       && line_yuuQ_time == 0 && line_furiQ_time == 0 && line_daiQ_time == 0 && line_daitaiQ_time == 0 && line_dokuziQ_time == 0
+       && line_yuuQ_time_half_day_unit == 0 && line_furiQ_time_half_day_unit == 0 && line_daiQ_time_half_day_unit == 0 && line_daitaiQ_time_half_day_unit == 0 && line_dokuziQ_time_half_day_unit == 0
+       ) {
+        pro_not_set_day_number++;
+        line_not_set_day_flag = 1; //未設定日フラグ
+      } //未設定日数
+
+      if (obj["plan_start"] != "" && obj["plan_end"] != "" && obj["result_start"] != "" && obj["result_end"] != "") {
+        if(obj["data"]["plan_breaktime"] != null && obj["data"]["result_breaktime"] != null){
+          let planTotalBreaktime = 0;
+          for (let breaktimeObj of obj["data"]["plan_breaktime"]) {
+            planTotalBreaktime = planTotalBreaktime + Number(breaktimeObj["total_time"]);
+          }
+          let resultTotalBreaktime = 0;
+          for (let breaktimeObj of obj["data"]["result_breaktime"]) {
+            resultTotalBreaktime = resultTotalBreaktime + Number(breaktimeObj["total_time"]);
+          }
+          if(planTotalBreaktime != resultTotalBreaktime){
+            pro_break_time_disagreement_number++;
+            line_break_time_disagreement_flag = 1; //休憩時間一致フラグ
           }
         }
       }
@@ -2533,6 +2566,9 @@ export const calculateTotalResultData =
 
         shift_patten_name: line_shift_patten_name,
         shift_patten_color: line_shift_patten_color,
+
+        not_set_day_flag: line_not_set_day_flag, //未設定日フラグ
+        break_time_disagreement_flag: line_break_time_disagreement_flag, //休憩時間不一致フラグ
 
         shift: line_shift, //シフト
         plan_start: obj["plan_start"], //シフト出勤時刻
@@ -3161,9 +3197,25 @@ export const calculateTotalResultData =
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
     const version = "v20230314";
 
+    //集計が正しく行えなくなる設定不備の警告
+    let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0,breakTimeDisagreementNumber:0};
+
+    let workingType = 0;
+    if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
+      workingType = res["shift_template_data"]["working_type"]; //労働制度 0:通常労働制 1:変形労働制
+    } else {
+      worningArray.shiftTemplate = 1;
+    }
+    if(res["holiday_unit_type"] == null){ //休暇単位がない場合
+      worningArray.holidayUnitType = 1;
+    }
+    worningArray.notSetDayNumber = pro_not_set_day_number; //未設定日数
+    worningArray.breakTimeDisagreementNumber = pro_break_time_disagreement_number; //休憩時間不一致日数
+
     let res_data = {
       version: version, //集計処理のバージョン
       aggregate_date: aggregate_date, //集計日
+      worning_array: worningArray, //設定不備の警告
 
       //基本情報
       target_month: target_month, //対象月
@@ -3192,7 +3244,7 @@ export const calculateTotalResultData =
         res["user_data"]["group_shift_result_review"]
       ), //勤務実績確認状況表示
       holiday_unit_type: res["holiday_unit_type"], //休暇単位 0:分数単位 1:日数単位
-      working_type: res["shift_template_data"]["working_type"], //労働志度 0:通常労働制 1:変形労働制
+      working_type: workingType, //労働制度 0:通常労働制 1:変形労働制
       normal_work_month_limit: NumbermonthNormalWorklimit, //月合計の法定内の労働時間の上限
       normal_work_week_limit: arrayWeekNormalWorklimit, //週毎の法定内の労働時間の上限
 
@@ -3225,6 +3277,8 @@ export const calculateTotalResultData =
       pro_holiday_number: pro_holiday_number, //休日(所定＋法定)
       pro_normal_holiday_number: pro_normal_holiday_number, //所定休日日数
       pro_legal_holiday_number: pro_legal_holiday_number, //法定休日日数
+      pro_not_set_day_number: pro_not_set_day_number, //未設定日数
+      pro_break_time_disagreement_number: pro_break_time_disagreement_number, //休憩時間不一致日数
 
       //勤務時間
       pro_work_time: pro_work_time, //勤務(A～F合計)
