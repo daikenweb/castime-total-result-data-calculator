@@ -694,7 +694,7 @@ export const calculateTotalResultData =
         } else if (obj["result_start"] == "" || obj["result_end"] == "") {
           if (obj["Q_type"] == 1) {
             line_state = "有休";
-            line_state += in_date_search(1, obj["date"]);
+            //line_state += in_date_search(1, obj["date"]);
           } else if (obj["Q_type"] == 2) {
             line_state = "振休";
             line_state += in_date_search(2, obj["date"]);
@@ -717,7 +717,7 @@ export const calculateTotalResultData =
         } else {
           if (obj["Q_type"] == 1) {
             line_state = "勤務(有休)";
-            line_state += in_date_search(1, obj["date"]);
+            //line_state += in_date_search(1, obj["date"]);
           } else if (obj["Q_type"] == 2) {
             line_state = "勤務(振休)";
             line_state += in_date_search(2, obj["date"]);
