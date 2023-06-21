@@ -791,16 +791,20 @@ export const calculateTotalResultData =
               line_state += "(有休消化)";
             } //有休消化
             if (q_log_obj["type"] == 2) {
-              line_state += "(振休消化)";
+              line_state += "(振休消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //振休消化
             if (q_log_obj["type"] == 3) {
-              line_state += "(代休消化)";
+              line_state += "(代休消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //代休消化
             if (q_log_obj["type"] == 4) {
-              line_state += "(代替休暇消化)";
+              line_state += "(代替休暇消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //代替休暇消化
             if (q_log_obj["type"] == 5) {
-              line_state += "(独自休暇消化)";
+              line_state += "(独自休暇消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //独自休暇消化
           }
           if (
@@ -875,16 +879,20 @@ export const calculateTotalResultData =
               line_state += "(有休消化)";
             } //有休消化
             if (q_log_obj["type"] == 2) {
-              line_state += "(振休消化)";
+              line_state += "(振休消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //振休消化
             if (q_log_obj["type"] == 3) {
-              line_state += "(代休消化)";
+              line_state += "(代休消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //代休消化
             if (q_log_obj["type"] == 4) {
-              line_state += "(代替休暇消化)";
+              line_state += "(代替休暇消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //代替休暇消化
             if (q_log_obj["type"] == 5) {
-              line_state += "(独自休暇消化)";
+              line_state += "(独自休暇消化";
+              line_state += " " + q_log_obj["in_date"].split("-")[1] + "/" + q_log_obj["in_date"].split("-")[2] + ")";
             } //独自休暇消化
           }
           if (
