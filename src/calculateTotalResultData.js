@@ -3247,7 +3247,7 @@ export const calculateTotalResultData =
 
 
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
-    const version = "v20230314";
+    const version = "v20230919";
 
     //集計が正しく行えなくなる設定不備の警告
     let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0,breakTimeDisagreementNumber:0};
