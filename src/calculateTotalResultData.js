@@ -133,6 +133,8 @@ export const calculateTotalResultData =
 
     let request_data = []; //申請内容
 
+    let shift_name_data = []; //シフト名集計
+
     let report_label_data = []; //日報ラベル集計
 
     let oneday_breakdown_list = []; //WEB表示用、一日ごと内わけ用配列
@@ -278,6 +280,30 @@ export const calculateTotalResultData =
           }
         });
       }
+      ////////////////////////////////////////////
+      //シフト名集計
+      if (!obj.pre_calc) {
+
+        let shift_name = obj["data"]["default_shift"]["name"];
+        if(obj["data"]["custom_shift"] != null){ shift_name = obj["data"]["custom_shift"]["name"]; }
+
+        let f = true;
+        for(let shift_name_obj of shift_name_data){ if(shift_name_obj["name"] == shift_name){ f = false; } }
+
+        if(f){
+            shift_name_data.push({
+              name: shift_name,
+              number: 0,
+          });
+        }
+
+        for(let shift_name_obj of shift_name_data){
+          if(shift_name_obj["name"] == shift_name){
+            shift_name_obj["number"] = shift_name_obj["number"] + 1;
+          }
+        }
+      }
+      //console.log("shift_name_data",obj["date"],shift_name_data);
       ////////////////////////////////////////////
       //日報ラベル集計
       let line_report_label_data = [];
@@ -3388,6 +3414,8 @@ export const calculateTotalResultData =
       dokuziQ_stock_half_day_unit: Number(dokuziQ_stock_half_day_unit) / 2, //独自休暇残数
       dokuziQ_plan_half_day_unit: Number(dokuziQ_plan_half_day_unit) / 2, //独自休暇消化予定
       ///////////////////////////////
+
+      shift_name_data: shift_name_data, //シフト名集計
 
       report_label_data: report_label_data, //日報ラベル集計
 
