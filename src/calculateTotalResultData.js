@@ -285,7 +285,11 @@ export const calculateTotalResultData =
       if (!obj.pre_calc) {
 
         let shift_name = obj["data"]["default_shift"]["name"];
-        if(obj["data"]["custom_shift"] != null){ shift_name = obj["data"]["custom_shift"]["name"]; }
+        let shift_color = obj["data"]["default_shift"]["color"];
+        if(obj["data"]["custom_shift"] != null){
+          shift_name = obj["data"]["custom_shift"]["name"];
+          shift_color = obj["data"]["custom_shift"]["color"];
+        }
 
         let f = true;
         for(let shift_name_obj of shift_name_data){ if(shift_name_obj["name"] == shift_name){ f = false; } }
@@ -293,6 +297,7 @@ export const calculateTotalResultData =
         if(f){
             shift_name_data.push({
               name: shift_name,
+              color: shift_color,
               number: 0,
           });
         }
