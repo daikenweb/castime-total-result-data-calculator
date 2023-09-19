@@ -299,6 +299,7 @@ export const calculateTotalResultData =
               name: shift_name,
               color: shift_color,
               number: 0,
+              total_time: 0,
           });
         }
 
@@ -2571,6 +2572,18 @@ export const calculateTotalResultData =
       line_late_fast_time = line_late_start_time + line_fast_end_time; //遅刻早退
 
       pro_shift_over_work_time += line_shift_over_work_time; //残業時間(勤務時間-シフト合計)
+      ////////////////////////
+      //シフト名集計
+      let shift_name = obj["data"]["default_shift"]["name"];
+      if(obj["data"]["custom_shift"] != null){ shift_name = obj["data"]["custom_shift"]["name"]; }
+      if(shift_name_data.length != 0){
+        for(let shift_name_obj of shift_name_data){
+          if(shift_name_obj["name"] == shift_name){
+            shift_name_obj["total_time"] = shift_name_obj["total_time"] + Number(line_shift_time);
+          }
+        }
+      }
+      //console.log("shift_name_data",obj["date"],shift_name_data);
       ////////////////////////
       //日報編集
       for (let line_report_breakdown of line_report_label_data) {
