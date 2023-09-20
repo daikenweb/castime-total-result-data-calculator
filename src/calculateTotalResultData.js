@@ -133,6 +133,8 @@ export const calculateTotalResultData =
 
     let request_data = []; //申請内容
 
+    let shift_name_data = []; //シフト名集計
+
     let report_label_data = []; //日報ラベル集計
 
     let oneday_breakdown_list = []; //WEB表示用、一日ごと内わけ用配列
@@ -278,6 +280,36 @@ export const calculateTotalResultData =
           }
         });
       }
+      ////////////////////////////////////////////
+      //シフト名集計
+      if (!obj.pre_calc) {
+
+        let shift_name = obj["data"]["default_shift"]["name"];
+        let shift_color = obj["data"]["default_shift"]["color"];
+        if(obj["data"]["custom_shift"] != null){
+          shift_name = obj["data"]["custom_shift"]["name"];
+          shift_color = obj["data"]["custom_shift"]["color"];
+        }
+
+        let f = true;
+        for(let shift_name_obj of shift_name_data){ if(shift_name_obj["name"] == shift_name){ f = false; } }
+
+        if(f){
+            shift_name_data.push({
+              name: shift_name,
+              color: shift_color,
+              number: 0,
+              total_time: 0,
+          });
+        }
+
+        for(let shift_name_obj of shift_name_data){
+          if(shift_name_obj["name"] == shift_name){
+            shift_name_obj["number"] = shift_name_obj["number"] + 1;
+          }
+        }
+      }
+      //console.log("shift_name_data",obj["date"],shift_name_data);
       ////////////////////////////////////////////
       //日報ラベル集計
       let line_report_label_data = [];
@@ -2541,6 +2573,18 @@ export const calculateTotalResultData =
 
       pro_shift_over_work_time += line_shift_over_work_time; //残業時間(勤務時間-シフト合計)
       ////////////////////////
+      //シフト名集計
+      let shift_name = obj["data"]["default_shift"]["name"];
+      if(obj["data"]["custom_shift"] != null){ shift_name = obj["data"]["custom_shift"]["name"]; }
+      if(shift_name_data.length != 0){
+        for(let shift_name_obj of shift_name_data){
+          if(shift_name_obj["name"] == shift_name){
+            shift_name_obj["total_time"] = shift_name_obj["total_time"] + Number(line_shift_time);
+          }
+        }
+      }
+      //console.log("shift_name_data",obj["date"],shift_name_data);
+      ////////////////////////
       //日報編集
       for (let line_report_breakdown of line_report_label_data) {
         let f = 1;
@@ -2605,6 +2649,7 @@ export const calculateTotalResultData =
         fast_end_omit_break_time: line_fast_end_omit_break_time, //早退_休憩シフトを引く
         before_over_work_time: line_before_over_work_time, //前残業
         normal_holiday_work_time: line_normal_holiday_work_time, //所定休日労働
+        shift_over_time_plus_holiday_work_time: line_over_time + line_holiday_work_time + line_normal_holiday_work_time, //シフト外+所休労働+法休労働
         actual_work_time: line_actual_work_time, //打刻時間
 
         exday_state: line_exday_state, //特殊日設定
@@ -3203,7 +3248,7 @@ export const calculateTotalResultData =
 
 
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
-    const version = "v20230314";
+    const version = "v20230920";
 
     //集計が正しく行えなくなる設定不備の警告
     let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0,breakTimeDisagreementNumber:0};
@@ -3312,6 +3357,7 @@ export const calculateTotalResultData =
       pro_before_over_work_time: pro_before_over_work_time, //前残業
       pro_legal_inner_works_over: pro_legal_inner_works_over, //法定内残業
       pro_normal_holiday_work_time: pro_normal_holiday_work_time, //所定休日労働
+      pro_shift_over_time_plus_holiday_work_time: works.over + pro_holiday_work_time + pro_normal_holiday_work_time, //シフト外+所休労働+法休労働
       pro_actual_work_time: pro_actual_work_time, //打刻時間
 
       ///////////////////////////////
@@ -3388,6 +3434,8 @@ export const calculateTotalResultData =
       dokuziQ_stock_half_day_unit: Number(dokuziQ_stock_half_day_unit) / 2, //独自休暇残数
       dokuziQ_plan_half_day_unit: Number(dokuziQ_plan_half_day_unit) / 2, //独自休暇消化予定
       ///////////////////////////////
+
+      shift_name_data: shift_name_data, //シフト名集計
 
       report_label_data: report_label_data, //日報ラベル集計
 
