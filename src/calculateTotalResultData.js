@@ -2649,6 +2649,7 @@ export const calculateTotalResultData =
         fast_end_omit_break_time: line_fast_end_omit_break_time, //早退_休憩シフトを引く
         before_over_work_time: line_before_over_work_time, //前残業
         normal_holiday_work_time: line_normal_holiday_work_time, //所定休日労働
+        shift_over_time_plus_holiday_work_time: line_over_time + line_holiday_work_time + line_normal_holiday_work_time, //シフト外+所休労働+法休労働
         actual_work_time: line_actual_work_time, //打刻時間
 
         exday_state: line_exday_state, //特殊日設定
@@ -3247,7 +3248,7 @@ export const calculateTotalResultData =
 
 
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
-    const version = "v20230919";
+    const version = "v20230920";
 
     //集計が正しく行えなくなる設定不備の警告
     let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0,breakTimeDisagreementNumber:0};
@@ -3356,6 +3357,7 @@ export const calculateTotalResultData =
       pro_before_over_work_time: pro_before_over_work_time, //前残業
       pro_legal_inner_works_over: pro_legal_inner_works_over, //法定内残業
       pro_normal_holiday_work_time: pro_normal_holiday_work_time, //所定休日労働
+      pro_shift_over_time_plus_holiday_work_time: works.over + pro_holiday_work_time + pro_normal_holiday_work_time, //シフト外+所休労働+法休労働
       pro_actual_work_time: pro_actual_work_time, //打刻時間
 
       ///////////////////////////////
