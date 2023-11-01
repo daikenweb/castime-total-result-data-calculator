@@ -3251,7 +3251,13 @@ export const calculateTotalResultData =
     const version = "v20230920";
 
     //集計が正しく行えなくなる設定不備の警告
-    let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0,breakTimeDisagreementNumber:0};
+    let worningArray = {
+      shiftTemplate:0, 
+      holidayUnitType:0,
+      notSetDayNumber:0,
+      breakTimeDisagreementNumber:0,
+      normalWorkLimit:0
+    };
 
     let workingType = 0;
     if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
@@ -3264,6 +3270,23 @@ export const calculateTotalResultData =
     }
     worningArray.notSetDayNumber = pro_not_set_day_number; //未設定日数
     worningArray.breakTimeDisagreementNumber = pro_break_time_disagreement_number; //休憩時間不一致日数
+
+    //////////////
+    //console.log("労働上限判定");
+    const monthArray = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月", "12月"];
+    const monthDays = [31,28,31,30,31,30,31,31,30,31,30,31];
+    const monthNormalWorkLimitArray = [10626,9600,10626,10284,10626,10284,10626,10626,10284,10626,10284,10626];
+
+    const targetMonth = moment(start_date).format('M');
+    //console.log("start_date",start_date,targetMonth,monthArray[targetMonth-1],monthDays[targetMonth - 1],monthNormalWorkLimitArray[targetMonth - 1]);
+    //console.log("月合計の法定内の労働時間の上限",NumbermonthNormalWorklimit);
+    if (Number(NumbermonthNormalWorklimit) > Number(monthNormalWorkLimitArray[targetMonth - 1])) { worningArray.normalWorkLimit++; }
+    
+    //console.log("週毎の法定内の労働時間の上限",arrayWeekNormalWorklimit);
+    for (let obj of arrayWeekNormalWorklimit) {
+      if (Number(obj["total_limit_time"]) > 5 * 8 * 60) { worningArray.normalWorkLimit++; }
+    }
+    //////////////
 
     let res_data = {
       version: version, //集計処理のバージョン
