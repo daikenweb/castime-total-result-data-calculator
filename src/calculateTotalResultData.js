@@ -159,6 +159,12 @@ export const calculateTotalResultData =
 
     const daitaiQConversionRate = 0.25;
 
+
+    //警告フラグ
+    let notSetShift = 0;
+    let notSetResult = 0;
+    let notMatchResultStart = 0;
+    let notMatchResultEnd = 0;
     /**********************************************************/
     //ループ前処理
 
@@ -499,6 +505,53 @@ export const calculateTotalResultData =
       }
 
       ///////////////////////////////////
+      //警告フラグ
+      let lineWorningArray = {
+        notSetShift:0,
+        notSetResult:0,
+        notMatchResultStart:0,
+        notMatchResultEnd:0,
+      };
+
+      if (!obj.pre_calc) {
+        //前月の週のデータは集計しない
+        if ((obj["plan_start"] == "" || obj["plan_end"] == "") && (obj["result_start"] != "" || obj["result_end"] != "")) {
+          lineWorningArray["notSetShift"] = 1;
+          notSetShift += 1;
+        }
+        if ((obj["result_start"] == "" || obj["result_end"] == "") && (obj["plan_start"] != "" || obj["plan_end"] != "")) {
+          if ( (today.y <= y && today.m + 1 < m) || (today.y == y && today.m + 1 == m && today.d < d) ) {
+            //日付が今日以降だった場合
+          } else if (today.y == y && today.m + 1 == m && today.d == d) {
+            //日付が今日だった場合
+          } else {
+            //今日より前
+            lineWorningArray["notSetResult"] = 1;
+            notSetResult += 1;
+          }
+        }
+
+        if (obj["plan_start"] != "" && obj["result_start"] != "" ) {
+          if( ((moment(obj["plan_start"]) - moment(obj["result_start"])) / 60000) > 60){
+            lineWorningArray["notMatchResultStart"] = 1;
+            notMatchResultStart += 1;
+          }
+        }
+        if (obj["plan_end"] != "" && obj["result_end"] != "" ) {
+          let shiftEnd = obj["plan_end"];
+          if (obj["data"]["over_time"] != null) {
+            if (obj["data"]["over_time"]["auto"]){ shiftEnd = obj["data"]["over_time"]["auto"]["end"]; }
+            if (obj["data"]["over_time"]["request"]){ shiftEnd = obj["data"]["over_time"]["request"]["end"]; }
+          }
+
+          if( ((moment(obj["result_end"]) - moment(shiftEnd)) / 60000) > 60){
+            lineWorningArray["notMatchResultEnd"] = 1;
+            notMatchResultEnd += 1;
+          }
+        }
+      }
+      ///////////////////////////////////
+
       //6_20追加_休日出勤申請必須設定だった場合、プランなしの日はすべて打刻をなかったことに
       ///////
       //デバッグ用
@@ -2616,6 +2669,8 @@ export const calculateTotalResultData =
       oneday_breakdown_list.push({
         date: obj["date"], //日付け
 
+        worning_array: lineWorningArray, //設定不備の警告
+
         shift_patten_name: line_shift_patten_name,
         shift_patten_color: line_shift_patten_color,
 
@@ -3248,7 +3303,7 @@ export const calculateTotalResultData =
 
 
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
-    const version = "v20230920";
+    const version = "v20231107";
 
     //集計が正しく行えなくなる設定不備の警告
     let worningArray = {
@@ -3256,7 +3311,11 @@ export const calculateTotalResultData =
       holidayUnitType:0,
       notSetDayNumber:0,
       breakTimeDisagreementNumber:0,
-      normalWorkLimit:0
+      normalWorkLimit:0,
+      notSetShift:0,
+      notSetResult:0,
+      notMatchResultStart:0,
+      notMatchResultEnd:0,
     };
 
     let workingType = 0;
@@ -3286,6 +3345,11 @@ export const calculateTotalResultData =
     for (let obj of arrayWeekNormalWorklimit) {
       if (Number(obj["total_limit_time"]) > 5 * 8 * 60) { worningArray.normalWorkLimit++; }
     }
+    //////////////
+    worningArray["notSetShift"] = notSetShift;
+    worningArray["notSetResult"] = notSetResult;
+    worningArray["notMatchResultStart"] = notMatchResultStart;
+    worningArray["notMatchResultEnd"] = notMatchResultEnd;
     //////////////
 
     let res_data = {
