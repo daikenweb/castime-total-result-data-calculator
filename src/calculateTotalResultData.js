@@ -165,6 +165,8 @@ export const calculateTotalResultData =
     let notSetResult = 0;
     let notMatchResultStart = 0;
     let notMatchResultEnd = 0;
+    let badStart = 0;
+    let badEnd = 0;
     /**********************************************************/
     //ループ前処理
 
@@ -511,6 +513,8 @@ export const calculateTotalResultData =
         notSetResult:0,
         notMatchResultStart:0,
         notMatchResultEnd:0,
+        badStart:0,
+        badEnd:0,
       };
 
       if (!obj.pre_calc) {
@@ -548,6 +552,15 @@ export const calculateTotalResultData =
             lineWorningArray["notMatchResultEnd"] = 1;
             notMatchResultEnd += 1;
           }
+        }
+
+        if(obj["bad_start"] == 1){
+          lineWorningArray["badStart"] = 1;
+          badStart += 1;
+        }
+        if(obj["bad_end"] == 1){
+          lineWorningArray["badEnd"] = 1;
+          badEnd += 1;
         }
       }
       ///////////////////////////////////
@@ -3316,6 +3329,8 @@ export const calculateTotalResultData =
       notSetResult:0,
       notMatchResultStart:0,
       notMatchResultEnd:0,
+      badStart:0,
+      badEnd:0
     };
 
     let workingType = 0;
@@ -3350,6 +3365,8 @@ export const calculateTotalResultData =
     worningArray["notSetResult"] = notSetResult;
     worningArray["notMatchResultStart"] = notMatchResultStart;
     worningArray["notMatchResultEnd"] = notMatchResultEnd;
+    worningArray["badStart"] = badStart;
+    worningArray["badEnd"] = badEnd;
     //////////////
 
     let res_data = {
