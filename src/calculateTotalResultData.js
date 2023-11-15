@@ -3332,6 +3332,7 @@ export const calculateTotalResultData =
     const version = "v20231107";
 
     //集計が正しく行えなくなる設定不備の警告
+    let worningTotalCount = 0;
     let worningArray = {
       shiftTemplate:0, 
       holidayUnitType:0,
@@ -3351,13 +3352,17 @@ export const calculateTotalResultData =
       workingType = res["shift_template_data"]["working_type"]; //労働制度 0:通常労働制 1:変形労働制
     } else {
       worningArray.shiftTemplate = 1;
+      worningTotalCount++;
     }
     if(res["holiday_unit_type"] == null){ //休暇単位がない場合
       worningArray.holidayUnitType = 1;
+      worningTotalCount++;
     }
     worningArray.notSetDayNumber = pro_not_set_day_number; //未設定日数
+    worningTotalCount = worningTotalCount + pro_not_set_day_number;
+    
     worningArray.breakTimeDisagreementNumber = pro_break_time_disagreement_number; //休憩時間不一致日数
-
+    worningTotalCount = worningTotalCount + pro_break_time_disagreement_number;
     //////////////
     //console.log("労働上限判定");
     const monthArray = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月", "12月"];
@@ -3367,24 +3372,37 @@ export const calculateTotalResultData =
     const targetMonth = moment(start_date).format('M');
     //console.log("start_date",start_date,targetMonth,monthArray[targetMonth-1],monthDays[targetMonth - 1],monthNormalWorkLimitArray[targetMonth - 1]);
     //console.log("月合計の法定内の労働時間の上限",NumbermonthNormalWorklimit);
-    if (Number(NumbermonthNormalWorklimit) > Number(monthNormalWorkLimitArray[targetMonth - 1])) { worningArray.normalWorkLimit++; }
+    if (Number(NumbermonthNormalWorklimit) > Number(monthNormalWorkLimitArray[targetMonth - 1])) {
+      worningArray.normalWorkLimit++;
+      worningTotalCount++;
+    }
     
     //console.log("週毎の法定内の労働時間の上限",arrayWeekNormalWorklimit);
     for (let obj of arrayWeekNormalWorklimit) {
-      if (Number(obj["total_limit_time"]) > 5 * 8 * 60) { worningArray.normalWorkLimit++; }
+      if (Number(obj["total_limit_time"]) > 5 * 8 * 60) {
+        worningArray.normalWorkLimit++;
+        worningTotalCount++;
+      }
     }
     //////////////
     worningArray["notSetShift"] = notSetShift;
+    worningTotalCount = worningTotalCount + notSetShift;
     worningArray["notSetResult"] = notSetResult;
+    worningTotalCount = worningTotalCount + notSetResult;
     worningArray["notMatchResultStart"] = notMatchResultStart;
+    worningTotalCount = worningTotalCount + notMatchResultStart;
     worningArray["notMatchResultEnd"] = notMatchResultEnd;
+    worningTotalCount = worningTotalCount + notMatchResultEnd;
     worningArray["badStart"] = badStart;
+    worningTotalCount = worningTotalCount + badStart;
     worningArray["badEnd"] = badEnd;
+    worningTotalCount = worningTotalCount + badEnd;
     //////////////
 
     let res_data = {
       version: version, //集計処理のバージョン
       aggregate_date: aggregate_date, //集計日
+      worning_total_count: worningTotalCount,
       worning_array: worningArray, //設定不備の警告
 
       //基本情報
