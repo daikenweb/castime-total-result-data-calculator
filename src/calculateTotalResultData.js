@@ -159,6 +159,14 @@ export const calculateTotalResultData =
 
     const daitaiQConversionRate = 0.25;
 
+
+    //警告フラグ
+    let notSetShift = 0;
+    let notSetResult = 0;
+    let notMatchResultStart = 0;
+    let notMatchResultEnd = 0;
+    let badStart = 0;
+    let badEnd = 0;
     /**********************************************************/
     //ループ前処理
 
@@ -499,6 +507,71 @@ export const calculateTotalResultData =
       }
 
       ///////////////////////////////////
+      //警告フラグ
+      let lineWorningArray = {
+        notSetShift:0,
+        notSetResult:0,
+        notMatchResultStart:0,
+        notMatchResultEnd:0,
+        badStart:0,
+        badEnd:0,
+      };
+
+      if (!obj.pre_calc) {
+        //前月の週のデータは集計しない
+        //console.log("stamp_moment_auto_shift_change",res["shift_template_data"]["stamp_moment_auto_shift_change"]);
+        if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
+          //シフトを管理する場合のみに警告を出す
+          
+          if ((obj["plan_start"] == "" || obj["plan_end"] == "") && (obj["result_start"] != "" || obj["result_end"] != "")) {
+            lineWorningArray["notSetShift"] = 1;
+            notSetShift += 1;
+          }
+          if ((obj["result_start"] == "" || obj["result_end"] == "") && (obj["plan_start"] != "" || obj["plan_end"] != "")) {
+            if ( (today.y <= y && today.m + 1 < m) || (today.y == y && today.m + 1 == m && today.d < d) ) {
+              //日付が今日以降だった場合
+            } else if (today.y == y && today.m + 1 == m && today.d == d) {
+              //日付が今日だった場合
+            } else {
+              //今日より前
+              lineWorningArray["notSetResult"] = 1;
+              notSetResult += 1;
+            }
+          }
+
+          if (obj["plan_start"] != "" && obj["result_start"] != "" ) {
+            if( ((moment(obj["plan_start"]) - moment(obj["result_start"])) / 60000) > 60){
+              lineWorningArray["notMatchResultStart"] = 1;
+              notMatchResultStart += 1;
+            }
+          }
+          if (obj["plan_end"] != "" && obj["result_end"] != "" ) {
+            if (obj["data"]["over_time"]["not_over_calc"] == "f") { //承認外残業時間が切り捨ての場合のみ警告を出す
+              let shiftEnd = obj["plan_end"];
+              if (obj["data"]["over_time"] != null) {
+                if (obj["data"]["over_time"]["auto"]){ shiftEnd = obj["data"]["over_time"]["auto"]["end"]; }
+                if (obj["data"]["over_time"]["request"]){ shiftEnd = obj["data"]["over_time"]["request"]["end"]; }
+              }
+
+              if( ((moment(obj["result_end"]) - moment(shiftEnd)) / 60000) > 60){
+                lineWorningArray["notMatchResultEnd"] = 1;
+                notMatchResultEnd += 1;
+              }
+            }
+          }
+
+          if(obj["bad_start"] == 1){
+            lineWorningArray["badStart"] = 1;
+            badStart += 1;
+          }
+          if(obj["bad_end"] == 1){
+            lineWorningArray["badEnd"] = 1;
+            badEnd += 1;
+          }
+        }
+      }
+      ///////////////////////////////////
+
       //6_20追加_休日出勤申請必須設定だった場合、プランなしの日はすべて打刻をなかったことに
       ///////
       //デバッグ用
@@ -2044,8 +2117,11 @@ export const calculateTotalResultData =
        && line_yuuQ_time == 0 && line_furiQ_time == 0 && line_daiQ_time == 0 && line_daitaiQ_time == 0 && line_dokuziQ_time == 0
        && line_yuuQ_time_half_day_unit == 0 && line_furiQ_time_half_day_unit == 0 && line_daiQ_time_half_day_unit == 0 && line_daitaiQ_time_half_day_unit == 0 && line_dokuziQ_time_half_day_unit == 0
        ) {
-        pro_not_set_day_number++;
-        line_not_set_day_flag = 1; //未設定日フラグ
+        //if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
+          //シフトを管理する場合のみに警告を出してもいいが、管理しなくても未設定はないほうが良いので警告は出したままにする
+          pro_not_set_day_number++;
+          line_not_set_day_flag = 1; //未設定日フラグ
+        //}
       } //未設定日数
 
       if (obj["plan_start"] != "" && obj["plan_end"] != "" && obj["result_start"] != "" && obj["result_end"] != "") {
@@ -2059,8 +2135,11 @@ export const calculateTotalResultData =
             resultTotalBreaktime = resultTotalBreaktime + Number(breaktimeObj["total_time"]);
           }
           if(planTotalBreaktime != resultTotalBreaktime){
-            pro_break_time_disagreement_number++;
-            line_break_time_disagreement_flag = 1; //休憩時間一致フラグ
+            if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
+              //シフトを管理する場合のみに警告を出す
+              pro_break_time_disagreement_number++;
+              line_break_time_disagreement_flag = 1; //休憩時間一致フラグ
+            }
           }
         }
       }
@@ -2615,6 +2694,8 @@ export const calculateTotalResultData =
 
       oneday_breakdown_list.push({
         date: obj["date"], //日付け
+
+        worning_array: lineWorningArray, //設定不備の警告
 
         shift_patten_name: line_shift_patten_name,
         shift_patten_color: line_shift_patten_color,
@@ -3248,26 +3329,80 @@ export const calculateTotalResultData =
 
 
     const aggregate_date = moment().format('YYYY-MM-DD HH:mm:ss');
-    const version = "v20230920";
+    const version = "v20231107";
 
     //集計が正しく行えなくなる設定不備の警告
-    let worningArray = {shiftTemplate:0, holidayUnitType:0,notSetDayNumber:0,breakTimeDisagreementNumber:0};
+    let worningTotalCount = 0;
+    let worningArray = {
+      shiftTemplate:0, 
+      holidayUnitType:0,
+      notSetDayNumber:0,
+      breakTimeDisagreementNumber:0,
+      normalWorkLimit:0,
+      notSetShift:0,
+      notSetResult:0,
+      notMatchResultStart:0,
+      notMatchResultEnd:0,
+      badStart:0,
+      badEnd:0
+    };
 
     let workingType = 0;
     if(res["shift_template_data"] != null){ //シフトテンプレートがない場合を考慮(通常労働制扱いにする)
       workingType = res["shift_template_data"]["working_type"]; //労働制度 0:通常労働制 1:変形労働制
     } else {
       worningArray.shiftTemplate = 1;
+      worningTotalCount++;
     }
     if(res["holiday_unit_type"] == null){ //休暇単位がない場合
       worningArray.holidayUnitType = 1;
+      worningTotalCount++;
     }
     worningArray.notSetDayNumber = pro_not_set_day_number; //未設定日数
+    worningTotalCount = worningTotalCount + pro_not_set_day_number;
+    
     worningArray.breakTimeDisagreementNumber = pro_break_time_disagreement_number; //休憩時間不一致日数
+    worningTotalCount = worningTotalCount + pro_break_time_disagreement_number;
+    //////////////
+    //console.log("労働上限判定");
+    const monthArray = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月", "12月"];
+    const monthDays = [31,28,31,30,31,30,31,31,30,31,30,31];
+    const monthNormalWorkLimitArray = [10626,9600,10626,10284,10626,10284,10626,10626,10284,10626,10284,10626];
+
+    const targetMonth = moment(start_date).format('M');
+    //console.log("start_date",start_date,targetMonth,monthArray[targetMonth-1],monthDays[targetMonth - 1],monthNormalWorkLimitArray[targetMonth - 1]);
+    //console.log("月合計の法定内の労働時間の上限",NumbermonthNormalWorklimit);
+    if (Number(NumbermonthNormalWorklimit) > Number(monthNormalWorkLimitArray[targetMonth - 1])) {
+      worningArray.normalWorkLimit++;
+      worningTotalCount++;
+    }
+    
+    //console.log("週毎の法定内の労働時間の上限",arrayWeekNormalWorklimit);
+    for (let obj of arrayWeekNormalWorklimit) {
+      if (Number(obj["total_limit_time"]) > 5 * 8 * 60) {
+        worningArray.normalWorkLimit++;
+        worningTotalCount++;
+      }
+    }
+    //////////////
+    worningArray["notSetShift"] = notSetShift;
+    worningTotalCount = worningTotalCount + notSetShift;
+    worningArray["notSetResult"] = notSetResult;
+    worningTotalCount = worningTotalCount + notSetResult;
+    worningArray["notMatchResultStart"] = notMatchResultStart;
+    worningTotalCount = worningTotalCount + notMatchResultStart;
+    worningArray["notMatchResultEnd"] = notMatchResultEnd;
+    worningTotalCount = worningTotalCount + notMatchResultEnd;
+    worningArray["badStart"] = badStart;
+    worningTotalCount = worningTotalCount + badStart;
+    worningArray["badEnd"] = badEnd;
+    worningTotalCount = worningTotalCount + badEnd;
+    //////////////
 
     let res_data = {
       version: version, //集計処理のバージョン
       aggregate_date: aggregate_date, //集計日
+      worning_total_count: worningTotalCount,
       worning_array: worningArray, //設定不備の警告
 
       //基本情報
