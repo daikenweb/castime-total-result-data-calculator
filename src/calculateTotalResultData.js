@@ -546,15 +546,17 @@ export const calculateTotalResultData =
             }
           }
           if (obj["plan_end"] != "" && obj["result_end"] != "" ) {
-            let shiftEnd = obj["plan_end"];
-            if (obj["data"]["over_time"] != null) {
-              if (obj["data"]["over_time"]["auto"]){ shiftEnd = obj["data"]["over_time"]["auto"]["end"]; }
-              if (obj["data"]["over_time"]["request"]){ shiftEnd = obj["data"]["over_time"]["request"]["end"]; }
-            }
+            if (obj["data"]["over_time"]["not_over_calc"] == "f") { //承認外残業時間が切り捨ての場合のみ警告を出す
+              let shiftEnd = obj["plan_end"];
+              if (obj["data"]["over_time"] != null) {
+                if (obj["data"]["over_time"]["auto"]){ shiftEnd = obj["data"]["over_time"]["auto"]["end"]; }
+                if (obj["data"]["over_time"]["request"]){ shiftEnd = obj["data"]["over_time"]["request"]["end"]; }
+              }
 
-            if( ((moment(obj["result_end"]) - moment(shiftEnd)) / 60000) > 60){
-              lineWorningArray["notMatchResultEnd"] = 1;
-              notMatchResultEnd += 1;
+              if( ((moment(obj["result_end"]) - moment(shiftEnd)) / 60000) > 60){
+                lineWorningArray["notMatchResultEnd"] = 1;
+                notMatchResultEnd += 1;
+              }
             }
           }
 
