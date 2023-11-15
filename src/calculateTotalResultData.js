@@ -519,48 +519,52 @@ export const calculateTotalResultData =
 
       if (!obj.pre_calc) {
         //前月の週のデータは集計しない
-        if ((obj["plan_start"] == "" || obj["plan_end"] == "") && (obj["result_start"] != "" || obj["result_end"] != "")) {
-          lineWorningArray["notSetShift"] = 1;
-          notSetShift += 1;
-        }
-        if ((obj["result_start"] == "" || obj["result_end"] == "") && (obj["plan_start"] != "" || obj["plan_end"] != "")) {
-          if ( (today.y <= y && today.m + 1 < m) || (today.y == y && today.m + 1 == m && today.d < d) ) {
-            //日付が今日以降だった場合
-          } else if (today.y == y && today.m + 1 == m && today.d == d) {
-            //日付が今日だった場合
-          } else {
-            //今日より前
-            lineWorningArray["notSetResult"] = 1;
-            notSetResult += 1;
+        if(res["stamp_moment_auto_shift_change"] == false){ 
+          //シフトを管理する場合のみに警告を出す
+          
+          if ((obj["plan_start"] == "" || obj["plan_end"] == "") && (obj["result_start"] != "" || obj["result_end"] != "")) {
+            lineWorningArray["notSetShift"] = 1;
+            notSetShift += 1;
           }
-        }
-
-        if (obj["plan_start"] != "" && obj["result_start"] != "" ) {
-          if( ((moment(obj["plan_start"]) - moment(obj["result_start"])) / 60000) > 60){
-            lineWorningArray["notMatchResultStart"] = 1;
-            notMatchResultStart += 1;
-          }
-        }
-        if (obj["plan_end"] != "" && obj["result_end"] != "" ) {
-          let shiftEnd = obj["plan_end"];
-          if (obj["data"]["over_time"] != null) {
-            if (obj["data"]["over_time"]["auto"]){ shiftEnd = obj["data"]["over_time"]["auto"]["end"]; }
-            if (obj["data"]["over_time"]["request"]){ shiftEnd = obj["data"]["over_time"]["request"]["end"]; }
+          if ((obj["result_start"] == "" || obj["result_end"] == "") && (obj["plan_start"] != "" || obj["plan_end"] != "")) {
+            if ( (today.y <= y && today.m + 1 < m) || (today.y == y && today.m + 1 == m && today.d < d) ) {
+              //日付が今日以降だった場合
+            } else if (today.y == y && today.m + 1 == m && today.d == d) {
+              //日付が今日だった場合
+            } else {
+              //今日より前
+              lineWorningArray["notSetResult"] = 1;
+              notSetResult += 1;
+            }
           }
 
-          if( ((moment(obj["result_end"]) - moment(shiftEnd)) / 60000) > 60){
-            lineWorningArray["notMatchResultEnd"] = 1;
-            notMatchResultEnd += 1;
+          if (obj["plan_start"] != "" && obj["result_start"] != "" ) {
+            if( ((moment(obj["plan_start"]) - moment(obj["result_start"])) / 60000) > 60){
+              lineWorningArray["notMatchResultStart"] = 1;
+              notMatchResultStart += 1;
+            }
           }
-        }
+          if (obj["plan_end"] != "" && obj["result_end"] != "" ) {
+            let shiftEnd = obj["plan_end"];
+            if (obj["data"]["over_time"] != null) {
+              if (obj["data"]["over_time"]["auto"]){ shiftEnd = obj["data"]["over_time"]["auto"]["end"]; }
+              if (obj["data"]["over_time"]["request"]){ shiftEnd = obj["data"]["over_time"]["request"]["end"]; }
+            }
 
-        if(obj["bad_start"] == 1){
-          lineWorningArray["badStart"] = 1;
-          badStart += 1;
-        }
-        if(obj["bad_end"] == 1){
-          lineWorningArray["badEnd"] = 1;
-          badEnd += 1;
+            if( ((moment(obj["result_end"]) - moment(shiftEnd)) / 60000) > 60){
+              lineWorningArray["notMatchResultEnd"] = 1;
+              notMatchResultEnd += 1;
+            }
+          }
+
+          if(obj["bad_start"] == 1){
+            lineWorningArray["badStart"] = 1;
+            badStart += 1;
+          }
+          if(obj["bad_end"] == 1){
+            lineWorningArray["badEnd"] = 1;
+            badEnd += 1;
+          }
         }
       }
       ///////////////////////////////////
@@ -2110,8 +2114,11 @@ export const calculateTotalResultData =
        && line_yuuQ_time == 0 && line_furiQ_time == 0 && line_daiQ_time == 0 && line_daitaiQ_time == 0 && line_dokuziQ_time == 0
        && line_yuuQ_time_half_day_unit == 0 && line_furiQ_time_half_day_unit == 0 && line_daiQ_time_half_day_unit == 0 && line_daitaiQ_time_half_day_unit == 0 && line_dokuziQ_time_half_day_unit == 0
        ) {
-        pro_not_set_day_number++;
-        line_not_set_day_flag = 1; //未設定日フラグ
+        //if(res["stamp_moment_auto_shift_change"] == false){ 
+          //シフトを管理する場合のみに警告を出してもいいが、管理しなくても未設定はないほうが良いので警告は出したままにする
+          pro_not_set_day_number++;
+          line_not_set_day_flag = 1; //未設定日フラグ
+        //}
       } //未設定日数
 
       if (obj["plan_start"] != "" && obj["plan_end"] != "" && obj["result_start"] != "" && obj["result_end"] != "") {
@@ -2125,8 +2132,11 @@ export const calculateTotalResultData =
             resultTotalBreaktime = resultTotalBreaktime + Number(breaktimeObj["total_time"]);
           }
           if(planTotalBreaktime != resultTotalBreaktime){
-            pro_break_time_disagreement_number++;
-            line_break_time_disagreement_flag = 1; //休憩時間一致フラグ
+            if(res["stamp_moment_auto_shift_change"] == false){ 
+              //シフトを管理する場合のみに警告を出す
+              pro_break_time_disagreement_number++;
+              line_break_time_disagreement_flag = 1; //休憩時間一致フラグ
+            }
           }
         }
       }
