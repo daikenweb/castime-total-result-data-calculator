@@ -519,7 +519,8 @@ export const calculateTotalResultData =
 
       if (!obj.pre_calc) {
         //前月の週のデータは集計しない
-        if(res["stamp_moment_auto_shift_change"] == false){ 
+        //console.log("stamp_moment_auto_shift_change",res["shift_template_data"]["stamp_moment_auto_shift_change"]);
+        if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
           //シフトを管理する場合のみに警告を出す
           
           if ((obj["plan_start"] == "" || obj["plan_end"] == "") && (obj["result_start"] != "" || obj["result_end"] != "")) {
@@ -2114,7 +2115,7 @@ export const calculateTotalResultData =
        && line_yuuQ_time == 0 && line_furiQ_time == 0 && line_daiQ_time == 0 && line_daitaiQ_time == 0 && line_dokuziQ_time == 0
        && line_yuuQ_time_half_day_unit == 0 && line_furiQ_time_half_day_unit == 0 && line_daiQ_time_half_day_unit == 0 && line_daitaiQ_time_half_day_unit == 0 && line_dokuziQ_time_half_day_unit == 0
        ) {
-        //if(res["stamp_moment_auto_shift_change"] == false){ 
+        //if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
           //シフトを管理する場合のみに警告を出してもいいが、管理しなくても未設定はないほうが良いので警告は出したままにする
           pro_not_set_day_number++;
           line_not_set_day_flag = 1; //未設定日フラグ
@@ -2132,7 +2133,7 @@ export const calculateTotalResultData =
             resultTotalBreaktime = resultTotalBreaktime + Number(breaktimeObj["total_time"]);
           }
           if(planTotalBreaktime != resultTotalBreaktime){
-            if(res["stamp_moment_auto_shift_change"] == false){ 
+            if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
               //シフトを管理する場合のみに警告を出す
               pro_break_time_disagreement_number++;
               line_break_time_disagreement_flag = 1; //休憩時間一致フラグ
