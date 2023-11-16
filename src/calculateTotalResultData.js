@@ -69,6 +69,7 @@ export const calculateTotalResultData =
     let pro_legal_holiday_number = 0; //法定休日日数
     let pro_not_set_day_number = 0; //未設定日数
     let pro_break_time_disagreement_number = 0; //休憩シフト、休憩実績不一致日数
+    let pro_late_night_work_number = 0; //深夜労働日数
 
     //勤務時間
     let pro_work_time = 0; //勤務時間(A～F)
@@ -2645,6 +2646,10 @@ export const calculateTotalResultData =
         oneday_payroll_midnight_nomal +
         oneday_payroll_midnight_over +
         oneday_payroll_midnight_holiday; //深夜労働(B+D+F)
+      if(line_deep_night_time > 0){
+        pro_late_night_work_number++;
+      }
+        
       let line_holiday_work_time =
         oneday_payroll_holiday + oneday_payroll_midnight_holiday; //法休労働(E+F)
 
@@ -3467,6 +3472,7 @@ export const calculateTotalResultData =
       pro_legal_holiday_number: pro_legal_holiday_number, //法定休日日数
       pro_not_set_day_number: pro_not_set_day_number, //未設定日数
       pro_break_time_disagreement_number: pro_break_time_disagreement_number, //休憩時間不一致日数
+      pro_late_night_work_number: pro_late_night_work_number, //深夜労働日数
 
       //勤務時間
       pro_work_time: pro_work_time, //勤務(A～F合計)
