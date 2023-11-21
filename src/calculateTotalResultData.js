@@ -3376,19 +3376,22 @@ export const calculateTotalResultData =
 
     const targetMonth = moment(start_date).format('M');
     //console.log("start_date",start_date,targetMonth,monthArray[targetMonth-1],monthDays[targetMonth - 1],monthNormalWorkLimitArray[targetMonth - 1]);
-    //console.log("月合計の法定内の労働時間の上限",NumbermonthNormalWorklimit);
-    if (Number(NumbermonthNormalWorklimit) > Number(monthNormalWorkLimitArray[targetMonth - 1])) {
-      worningArray.normalWorkLimit++;
-      worningTotalCount++;
-    }
     
-    //console.log("週毎の法定内の労働時間の上限",arrayWeekNormalWorklimit);
-    for (let obj of arrayWeekNormalWorklimit) {
-      if (Number(obj["total_limit_time"]) > 5 * 8 * 60) {
+    if(res["shift_template_data"] != null){if(res["shift_template_data"]["working_type"] == 1){ //変形労働制の場合のみ警告を判定する
+      //console.log("月合計の法定内の労働時間の上限",NumbermonthNormalWorklimit);
+      if (Number(NumbermonthNormalWorklimit) > Number(monthNormalWorkLimitArray[targetMonth - 1])) {
         worningArray.normalWorkLimit++;
         worningTotalCount++;
       }
-    }
+      
+      //console.log("週毎の法定内の労働時間の上限",arrayWeekNormalWorklimit);
+      for (let obj of arrayWeekNormalWorklimit) {
+        if (Number(obj["total_limit_time"]) > 5 * 8 * 60) {
+          worningArray.normalWorkLimit++;
+          worningTotalCount++;
+        }
+      }
+    }}
     //////////////
     worningArray["notSetShift"] = notSetShift;
     worningTotalCount = worningTotalCount + notSetShift;
