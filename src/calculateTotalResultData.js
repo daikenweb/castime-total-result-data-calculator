@@ -3369,6 +3369,8 @@ export const calculateTotalResultData =
     worningArray.breakTimeDisagreementNumber = pro_break_time_disagreement_number; //休憩時間不一致日数
     worningTotalCount = worningTotalCount + pro_break_time_disagreement_number;
     //////////////
+    //変形労働制の警告は出さないことになったのでコメントアウト
+    /*
     //console.log("労働上限判定");
     const monthArray = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月", "12月"];
     const monthDays = [31,28,31,30,31,30,31,31,30,31,30,31];
@@ -3392,6 +3394,7 @@ export const calculateTotalResultData =
         }
       }
     }}
+    */
     //////////////
     worningArray["notSetShift"] = notSetShift;
     worningTotalCount = worningTotalCount + notSetShift;
