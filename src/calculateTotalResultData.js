@@ -2118,11 +2118,10 @@ export const calculateTotalResultData =
        && line_yuuQ_time == 0 && line_furiQ_time == 0 && line_daiQ_time == 0 && line_daitaiQ_time == 0 && line_dokuziQ_time == 0
        && line_yuuQ_time_half_day_unit == 0 && line_furiQ_time_half_day_unit == 0 && line_daiQ_time_half_day_unit == 0 && line_daitaiQ_time_half_day_unit == 0 && line_dokuziQ_time_half_day_unit == 0
        ) {
-        //if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ 
-          //シフトを管理する場合のみに警告を出してもいいが、管理しなくても未設定はないほうが良いので警告は出したままにする
+        if(res["shift_template_data"]["stamp_moment_auto_shift_change"] == false){ //シフトを管理する場合のみに警告を出す
           pro_not_set_day_number++;
           line_not_set_day_flag = 1; //未設定日フラグ
-        //}
+        }
       } //未設定日数
 
       if (obj["plan_start"] != "" && obj["plan_end"] != "" && obj["result_start"] != "" && obj["result_end"] != "") {
